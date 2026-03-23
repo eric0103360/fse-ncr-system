@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSE | NCR Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+:root {
+  --bg:#0a0e1a;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;
+  --accent:#e8a020;--accent2:#f0b840;--green:#10b981;--amber:#f59e0b;
+  --red:#ef4444;--blue:#3b82f6;--text:#e2e8f0;--muted:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1420,#141e30,#1a2840);border-bottom:2px solid var(--accent);height:72px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.6);}
+.logo-img{width:52px;height:52px;object-fit:contain;}
+.brand-name{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:3px;text-transform:uppercase;line-height:1;}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.hdiv{width:1px;height:36px;background:var(--border);margin:0 8px;}
+.htitle{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:600;letter-spacing:2px;color:var(--text);text-transform:uppercase;}
+.hright{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.live-badge{display:flex;align-items:center;gap:7px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--green);letter-spacing:1px;text-transform:uppercase;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.7);}}
+.hbtn{display:flex;align-items:center;gap:6px;background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.3);border-radius:8px;padding:6px 14px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.hbtn:hover{background:rgba(232,160,32,.2);}
+.admin-badge{display:none;align-items:center;gap:7px;background:rgba(232,160,32,.12);border:1px solid rgba(232,160,32,.35);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--accent);letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+.admin-badge:hover{background:rgba(232,160,32,.2);}
+
+/* TABS */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 24px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:13px 20px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* MAIN */
+main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
+.view{display:none;}
+.view.active{display:block;}
+
+/* CARDS */
+.sum-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
+@media(max-width:900px){.sum-row{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:500px){.sum-row{grid-template-columns:repeat(2,1fr);}}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;}
+.sum-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.sum-card.c-total::before{background:var(--accent);}
+.sum-card.c-open::before{background:var(--blue);}
+.sum-card.c-closed::before{background:var(--green);}
+.sum-card.c-over::before{background:var(--red);}
+.sum-card.c-crit::before{background:#dc2626;}
+.sum-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.sum-val{font-family:'Rajdhani',sans-serif;font-size:42px;font-weight:700;line-height:1;}
+.sum-card.c-total .sum-val{color:var(--accent);}
+.sum-card.c-open .sum-val{color:var(--blue);}
+.sum-card.c-closed .sum-val{color:var(--green);}
+.sum-card.c-over .sum-val{color:var(--red);}
+.sum-card.c-crit .sum-val{color:#dc2626;}
+.sum-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.twrap-header{padding:14px 20px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.twrap-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;}
+.fbtn{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;}
+.fbtn:hover,.fbtn.active{background:var(--accent);color:#000;border-color:var(--accent);}
+.fbtn.f-open.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.fbtn.f-closed.active{background:var(--green);border-color:var(--green);color:#fff;}
+.fbtn.f-crit.active{background:var(--red);border-color:var(--red);color:#fff;}
+
+.ncr-table{width:100%;border-collapse:collapse;}
+.ncr-table th{background:var(--surface2);padding:10px 14px;text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;}
+.ncr-table td{padding:10px 14px;border-bottom:1px solid rgba(30,45,69,.5);vertical-align:middle;}
+.ncr-table tr:last-child td{border-bottom:none;}
+.ncr-table tr:hover td{background:rgba(255,255,255,.02);}
+.ncr-table tr.row-crit td{border-left:3px solid var(--red);}
+.ncr-table tr.row-major td{border-left:3px solid var(--amber);}
+.ncr-table tr.row-minor td{border-left:3px solid var(--green);}
+
+/* BADGES */
+.b-crit{display:inline-flex;align-items:center;background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(220,38,38,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.b-major{display:inline-flex;align-items:center;background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.b-minor{display:inline-flex;align-items:center;background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.b-open{display:inline-flex;align-items:center;background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.b-closed{display:inline-flex;align-items:center;background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.b-inprog{display:inline-flex;align-items:center;background:rgba(232,160,32,.12);color:var(--accent);border:1px solid rgba(232,160,32,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.b-overdue{display:inline-flex;align-items:center;background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.cat-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:rgba(232,160,32,.12);color:var(--accent);border:1px solid rgba(232,160,32,.2);}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+@media(max-width:800px){.charts-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.chart-card.full{grid-column:1/-1;}
+.chart-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
+
+/* REGISTER FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:24px;margin-bottom:20px;}
+.form-title{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+@media(max-width:800px){.form-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr;}}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.form-grid-1{margin-bottom:16px;}
+.flabel{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.finput,.fselect,.ftextarea{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;}
+.finput:focus,.fselect:focus,.ftextarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(232,160,32,.15);}
+.ftextarea{resize:vertical;min-height:80px;line-height:1.5;}
+.fselect{cursor:pointer;}
+.priority-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.priority-btn{padding:10px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;text-align:center;}
+.priority-btn:hover{border-color:var(--text);color:var(--text);}
+.priority-btn.sel-crit{background:rgba(220,38,38,.15);border-color:#dc2626;color:#f87171;}
+.priority-btn.sel-major{background:rgba(245,158,11,.15);border-color:var(--amber);color:var(--amber);}
+.priority-btn.sel-minor{background:rgba(16,185,129,.15);border-color:var(--green);color:var(--green);}
+.issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+@media(max-width:600px){.issue-grid{grid-template-columns:1fr 1fr;}}
+.issue-btn{padding:8px 10px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;text-align:left;}
+.issue-btn:hover{border-color:var(--accent);color:var(--text);}
+.issue-btn.selected{background:rgba(232,160,32,.12);border-color:var(--accent);color:var(--accent);}
+.submit-btn{padding:13px 28px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.submit-btn:hover{background:var(--accent2);transform:translateY(-1px);}
+.viewonly-msg{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:14px 18px;font-size:12px;color:var(--amber);margin-bottom:20px;}
+
+/* NCR DETAIL MODAL */
+#modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px;}
+#modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:14px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;padding:28px;}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{cursor:pointer;color:var(--muted);font-size:20px;line-height:1;}
+.modal-close:hover{color:var(--text);}
+.modal-section{margin-bottom:16px;}
+.modal-section-title{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-field label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:3px;}
+.modal-field span{font-size:13px;font-weight:500;}
+.modal-edit-input,.modal-edit-select,.modal-edit-textarea{width:100%;padding:8px 10px;background:var(--surface2);border:1px dashed rgba(232,160,32,.35);border-radius:6px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-top:3px;}
+.modal-edit-textarea{resize:vertical;min-height:60px;line-height:1.5;}
+.modal-edit-input:focus,.modal-edit-select:focus,.modal-edit-textarea:focus{border-color:var(--accent);}
+.modal-save-btn{padding:10px 20px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;}
+
+/* LOGIN */
+#login-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0a0e1a,#0d1420,#111827);display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:14px;padding:40px 36px;width:100%;max-width:380px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6);}
+.login-logo{width:70px;height:70px;object-fit:contain;margin-bottom:16px;}
+.login-brand{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:4px;}
+.login-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;}
+.login-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:left;margin-bottom:6px;display:block;}
+.login-inp{width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;outline:none;margin-bottom:16px;letter-spacing:2px;transition:border-color .2s,box-shadow .2s;}
+.login-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,.15);}
+.login-btn{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-bottom:14px;}
+.login-btn:hover{background:var(--accent2);}
+.login-err{color:var(--red);font-size:11px;letter-spacing:1px;margin-top:-8px;margin-bottom:10px;display:none;}
+.vo-link{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;letter-spacing:1px;}
+.vo-link:hover{color:var(--text);}
+
+/* TOAST */
+#vo-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:12px 22px;font-size:12px;color:var(--text);z-index:9998;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+#vo-toast.show{opacity:1;}
+
+/* SECTION LABEL */
+.sec-label{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;margin-top:20px;}
+
+/* PRINT */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  header{position:relative!important;}
+  .tabs,.hbtn,#login-overlay,#vo-toast,.admin-badge,.submit-btn,.fbtn{display:none!important;}
+  .view{display:block!important;page-break-after:always;}
+  .view:last-child{page-break-after:avoid;}
+}
+
+@media(max-width:700px){
+  header{padding:0 14px;}
+  main{padding:14px 12px 40px;}
+  .ncr-table .hide-sm{display:none;}
+  .brand-name{font-size:16px;}
+  .login-logo{width:38px;height:38px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-overlay">
+  <div class="login-box">
+    <img class="login-logo" id="login-logo-img" src="" alt="FSE">
+    <div class="login-brand">FSE</div>
+    <div class="login-sub">NCR Management System</div>
+    <label class="login-lbl">Password</label>
+    <input type="password" class="login-inp" id="pwd-input" placeholder="Enter your password" onkeydown="if(event.key==='Enter')tryLogin()">
+    <div class="login-err" id="login-err">⚠ Incorrect password. Try again.</div>
+    <button class="login-btn" onclick="tryLogin()">🔐 Login</button>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;text-align:left">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Access Levels</div>
+      <div style="font-size:11px;color:var(--text);margin-bottom:4px">⚙️ <strong>Admin</strong> — Full access, raise &amp; close NCRs</div>
+      <div style="font-size:11px;color:var(--text);margin-bottom:4px">✏️ <strong>Assignee</strong> — Complete your assigned NCR actions</div>
+      <div style="font-size:11px;color:var(--muted)">👁 <strong>View Only</strong> — Read-only dashboard access</div>
+    </div>
+    <div class="vo-link" onclick="enterViewOnly()">Continue as View Only →</div>
+  </div>
+</div>
+
+<div id="vo-toast">🔒 View Only — Contact admin to make changes</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <img class="logo-img" id="header-logo" src="" alt="FSE">
+  <div>
+    <div class="brand-name">FSE</div>
+    <div class="brand-sub">Field Services &amp; Engineering</div>
+  </div>
+  <div class="hdiv"></div>
+  <div class="htitle">NCR Management System</div>
+  <div class="hright">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <button class="hbtn" onclick="printView()">🖨️ Print</button>
+    <button class="hbtn" onclick="printAll()">📄 Full Report</button>
+    <div class="admin-badge" id="admin-badge" onclick="logoutAdmin()">⚙ Admin</div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="showTab('register',this)">📋 NCR Register</button>
+  <button class="tab" onclick="showTab('new',this)">➕ Raise NCR</button>
+  <button class="tab" onclick="showTab('charts',this)">📈 Charts</button>
+</div>
+
+<main>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="view-dashboard" class="view active">
+  <div class="sum-row">
+    <div class="sum-card c-total"><div class="sum-label">Total NCRs</div><div class="sum-val" id="s-total">0</div><div class="sum-sub">All raised</div></div>
+    <div class="sum-card c-open"><div class="sum-label">Open</div><div class="sum-val" id="s-open">0</div><div class="sum-sub">Awaiting closure</div></div>
+    <div class="sum-card c-closed"><div class="sum-label">Closed</div><div class="sum-val" id="s-closed">0</div><div class="sum-sub">Resolved</div></div>
+    <div class="sum-card c-over"><div class="sum-label">Overdue</div><div class="sum-val" id="s-overdue">0</div><div class="sum-sub">Past due date</div></div>
+    <div class="sum-card c-crit"><div class="sum-label">Critical</div><div class="sum-val" id="s-crit">0</div><div class="sum-sub">Immediate action</div></div>
+  </div>
+
+  <!-- Monthly raised/closed bar -->
+  <div class="chart-card" style="margin-bottom:20px">
+    <div class="chart-title">Monthly NCRs — Raised vs Closed</div>
+    <canvas id="chart-monthly" height="120"></canvas>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">NCR Status Split</div>
+      <canvas id="chart-status" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">By Priority</div>
+      <canvas id="chart-priority" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">By Issue Type</div>
+      <canvas id="chart-type" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">By Department Responsible</div>
+      <canvas id="chart-dept" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Recent critical/overdue -->
+  <div class="sec-label">⚠ Critical &amp; Overdue NCRs</div>
+  <div class="table-wrap">
+    <div style="overflow-x:auto">
+      <table class="ncr-table">
+        <thead><tr>
+          <th>NCR #</th><th>Description</th><th>Priority</th><th>Dept</th><th>Due Date</th><th>Status</th>
+        </tr></thead>
+        <tbody id="dash-critical-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REGISTER ═══ -->
+<div id="view-register" class="view">
+  <div id="assignee-banner" style="display:none;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:var(--blue)">
+    ✏️ <strong>Assignee Mode</strong> — Click <strong>"Complete Actions"</strong> on any NCR to fill in your Root Cause, Corrective and Preventive Actions. Admin will review and close.
+  </div>
+  <div class="table-wrap">
+    <div class="twrap-header">
+      <div class="twrap-title">NCR Register</div>
+      <div class="filter-row">
+        <button class="fbtn active" onclick="filterReg('all',this)">All</button>
+        <button class="fbtn f-open" onclick="filterReg('Open',this)">Open</button>
+        <button class="fbtn" onclick="filterReg('In Progress',this)">In Progress</button>
+        <button class="fbtn f-closed" onclick="filterReg('Closed',this)">Closed</button>
+        <button class="fbtn f-crit" onclick="filterReg('CRITICAL',this)">Critical</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="ncr-table">
+        <thead><tr>
+          <th>NCR #</th>
+          <th>Date Raised</th>
+          <th>Description</th>
+          <th class="hide-sm">Issue Type</th>
+          <th>Priority</th>
+          <th class="hide-sm">Dept</th>
+          <th class="hide-sm">Assigned To</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="register-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RAISE NCR ═══ -->
+<div id="view-new" class="view">
+  <div id="raise-viewonly" class="viewonly-msg" style="display:none">
+    🔒 You are in View Only mode. Login as Admin to raise new NCRs.
+  </div>
+  <div id="raise-form">
+    <div class="form-card">
+      <div class="form-title">➕ Raise New NCR / NCAR</div>
+
+      <div class="form-grid">
+        <div>
+          <label class="flabel">NCR Number (auto)</label>
+          <input class="finput" id="f-ncr-num" readonly style="color:var(--accent);font-weight:600;">
+        </div>
+        <div>
+          <label class="flabel">Date Raised</label>
+          <input type="date" class="finput" id="f-date">
+        </div>
+        <div>
+          <label class="flabel">Raised By</label>
+          <input type="text" class="finput" id="f-raised-by" placeholder="Full name">
+        </div>
+      </div>
+
+      <label class="flabel">Priority</label>
+      <div class="priority-row">
+        <button class="priority-btn" onclick="selectPriority('CRITICAL',this)">🔴 CRITICAL<br><small style="font-size:10px;font-weight:400">Close: 24–72 hrs</small></button>
+        <button class="priority-btn" onclick="selectPriority('MAJOR',this)">🟠 MAJOR<br><small style="font-size:10px;font-weight:400">Close: 7 Days</small></button>
+        <button class="priority-btn" onclick="selectPriority('MINOR',this)">🟡 MINOR<br><small style="font-size:10px;font-weight:400">Close: 14 Days</small></button>
+      </div>
+
+      <label class="flabel">Issue Type (select one)</label>
+      <div class="issue-grid" id="issue-grid">
+        <button class="issue-btn" onclick="selectIssue(this)">Incident / Injury</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Quality Issue</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Safety &amp; Health</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Environmental Issue</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Internal Audit Query</button>
+        <button class="issue-btn" onclick="selectIssue(this)">External Audit Query</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Supplier Issue</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Near Miss</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Training Issue</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Employee Issue</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Improvement Suggestion</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Customer / 3rd Party</button>
+        <button class="issue-btn" onclick="selectIssue(this)">Contractor Issue</button>
+      </div>
+
+      <div class="form-grid-2" style="margin-top:16px">
+        <div>
+          <label class="flabel">🔁 Repeat Issue Tag <span style="color:var(--muted);font-size:9px;letter-spacing:1px">— used to detect recurrence (3+ = REPEAT)</span></label>
+          <select class="fselect" id="f-repeat-tag" onchange="checkOtherTag(this.value)">
+            <option value="">Select issue tag...</option>
+            <option>Incorrect Profiling / Flanges</option>
+            <option>Working at Heights — Non-Compliance</option>
+            <option>Gas Bottle Storage Non-Compliance</option>
+            <option>Poor Workmanship / Weld Quality</option>
+            <option>Drawing Not Followed</option>
+            <option>Welding Checklist Not Completed</option>
+            <option>QC Release Not Obtained</option>
+            <option>Supplier Material Non-Conformance</option>
+            <option>Incorrect Fabrication / Wrong Dimensions</option>
+            <option>Material Stored in Walkways</option>
+            <option>Welder Stamp / Identification Missing</option>
+            <option>Welding Machine Inspection Not Done</option>
+            <option>Consumable Store Control Issue</option>
+            <option>Asset Register Not Updated</option>
+            <option>Safety Harness Not Worn</option>
+            <option>PPE Non-Compliance</option>
+            <option>No Drawing References on Items</option>
+            <option>Contract / Technical Review Not Done</option>
+            <option>Product Status Not Identified</option>
+            <option>Toolbox Talk / DIFR Not Conducted</option>
+            <option>Rubber / Lining Defect</option>
+            <option>Holes Drilled Incorrect Size / Position</option>
+            <option>Other (type below)</option>
+          </select>
+        </div>
+        <div id="other-tag-wrap" style="display:none">
+          <label class="flabel">Custom Issue Tag <span style="color:var(--accent);font-size:9px">✏ Type your own</span></label>
+          <input type="text" class="finput" id="f-other-tag" placeholder="e.g. Incorrect painting spec...">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="flabel">Department Responsible</label>
+          <select class="fselect" id="f-dept">
+            <option value="">Select department...</option>
+            <option>Quality</option>
+            <option>Operations</option>
+            <option>HR / Trade</option>
+            <option>Safety / HSE</option>
+            <option>Supply Chain</option>
+            <option>Environment</option>
+            <option>Compliance</option>
+            <option>Fabrication Shop</option>
+            <option>Engineering</option>
+            <option>Management</option>
+          </select>
+        </div>
+        <div>
+          <label class="flabel">Assigned To</label>
+          <input type="text" class="finput" id="f-assigned" placeholder="Name / email">
+        </div>
+        <div>
+          <label class="flabel">Due Date</label>
+          <input type="date" class="finput" id="f-due">
+        </div>
+      </div>
+
+      <div class="form-grid-1">
+        <label class="flabel">Description of Non-Conformance</label>
+        <textarea class="ftextarea" id="f-desc" rows="3" placeholder="Describe the issue in detail..."></textarea>
+      </div>
+
+      <div class="form-grid-1">
+        <label class="flabel">Immediate Action Taken</label>
+        <textarea class="ftextarea" id="f-immediate" rows="2" placeholder="What was done immediately..."></textarea>
+      </div>
+
+      <div class="form-grid-2">
+        <div>
+          <label class="flabel">Root Cause (5 Why — Summary)</label>
+          <textarea class="ftextarea" id="f-rootcause" rows="3" placeholder="Why did this happen..."></textarea>
+        </div>
+        <div>
+          <label class="flabel">Corrective Action Planned</label>
+          <textarea class="ftextarea" id="f-corrective" rows="3" placeholder="Actions to correct..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-grid-1">
+        <label class="flabel">Preventive Action</label>
+        <textarea class="ftextarea" id="f-preventive" rows="2" placeholder="Actions to prevent recurrence..."></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="submitNCR()">✅ Register NCR</button>
+      <span id="form-msg" style="margin-left:16px;font-size:12px;color:var(--green);display:none;">✔ NCR Registered Successfully!</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHARTS ═══ -->
+<div id="view-charts" class="view">
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Repeat NCRs by Type</div>
+      <canvas id="chart-repeat" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Closure Rate by Priority</div>
+      <canvas id="chart-closure" height="220"></canvas>
+    </div>
+  </div>
+  <div class="chart-card full" style="margin-bottom:16px">
+    <div class="chart-title">NCR Trend — Last 6 Months</div>
+    <canvas id="chart-trend" height="130"></canvas>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Open vs Closed by Department</div>
+      <canvas id="chart-dept2" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Average Days to Close by Priority</div>
+      <canvas id="chart-avgdays" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div style="text-align:center;padding:16px;font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;border-top:1px solid var(--border);margin-top:20px;">
+  FSE | Field Services &amp; Engineering &nbsp;·&nbsp; NCR Management System &nbsp;·&nbsp; ⚡ Live
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// LOGO — embed FSE logo
+// ═══════════════════════════════════════════════
+const FSE_LOGO = "data:image/png;base64,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";
+document.getElementById('login-logo-img').src = FSE_LOGO;
+document.getElementById('header-logo').src = FSE_LOGO;
+
+// ═══════════════════════════════════════════════
+// ACCESS CONTROL
+// ═══════════════════════════════════════════════
+const ADMIN_HASH = "127560cfcf6098b9999de57dcbea7a75c82cdd302372ecff77069b31ed8bcf40";
+const ASSIGNEE_HASH = "0a3c83e6955c09b5d7b4cfc91d7f77ba8dcfbf9e0cbcbd5abd2588c2c06c1849";
+let isAdmin = false;
+let isAssignee = false;
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function tryLogin() {
+  const val = document.getElementById("pwd-input").value;
+  const h = await sha256(val);
+  if (h === ADMIN_HASH) {
+    isAdmin = true; isAssignee = false;
+    document.getElementById("login-overlay").style.display = "none";
+    document.getElementById("admin-badge").style.display = "flex";
+    document.getElementById("admin-badge").innerHTML = "⚙ Admin";
+    updateRaiseForm();
+    renderRegister();
+  } else if (h === ASSIGNEE_HASH) {
+    isAdmin = false; isAssignee = true;
+    document.getElementById("login-overlay").style.display = "none";
+    document.getElementById("admin-badge").style.display = "flex";
+    document.getElementById("admin-badge").innerHTML = "✏️ Assignee";
+    document.getElementById("admin-badge").style.background = "rgba(59,130,246,.12)";
+    document.getElementById("admin-badge").style.borderColor = "rgba(59,130,246,.35)";
+    document.getElementById("admin-badge").style.color = "var(--blue)";
+    updateRaiseForm();
+    // Switch to assignee view automatically
+    showAssigneeView();
+  } else {
+    const e = document.getElementById("login-err");
+    e.style.display = "block";
+    document.getElementById("pwd-input").value = "";
+    setTimeout(() => e.style.display = "none", 3000);
+  }
+}
+function enterViewOnly() {
+  isAdmin = false; isAssignee = false;
+  document.getElementById("login-overlay").style.display = "none";
+  updateRaiseForm();
+}
+function logoutAdmin() {
+  const role = isAdmin ? "Admin" : "Assignee";
+  if (confirm(`Log out of ${role} mode?`)) {
+    isAdmin = false; isAssignee = false;
+    document.getElementById("admin-badge").style.display = "none";
+    document.getElementById("admin-badge").innerHTML = "⚙ Admin";
+    document.getElementById("admin-badge").style.background = "";
+    document.getElementById("admin-badge").style.borderColor = "";
+    document.getElementById("admin-badge").style.color = "";
+    document.getElementById("login-overlay").style.display = "flex";
+    document.getElementById("pwd-input").value = "";
+  }
+}
+function showVOToast() {
+  const t = document.getElementById("vo-toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+function updateRaiseForm() {
+  document.getElementById("raise-viewonly").style.display = isAdmin ? "none" : "block";
+  document.getElementById("raise-form").style.display = isAdmin ? "block" : "none";
+}
+
+function showAssigneeView() {
+  // Switch to register tab filtered to open NCRs for assignee
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-register").classList.add("active");
+  document.querySelectorAll(".tab")[1].classList.add("active");
+  regFilter = "all";
+  renderRegister();
+}
+
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+let NCRs = [
+  { id:"NCR-102", date:"2024-01-16", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Supplier Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-01-16", desc:"F51491 Enprotec flanges incorrectly supplied to FSE.", immediate:"Items returned to supplier for correction.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-01-17", repeatTag:"Supplier Material Non-Conformance", repeatFlag:false },
+  { id:"NCR-103", date:"2024-01-31", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-02-06", desc:"F51379 Bifurcation canopy section incorrect profiled.", immediate:"Items quarantined pending re-profiling.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-02-06", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-104", date:"2024-01-30", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-02-06", desc:"F51477 Bifurcation canopy section incorrect profiled.", immediate:"Items quarantined pending re-profiling.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-02-06", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-105", date:"2024-02-13", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Mac Steel", due:"2024-02-19", desc:"F51515 Rotec radial beams — 7 off beams scraped upon receiving due to incorrect profiling (Drawing C563-01A-SS03-02-050).", immediate:"Beams rejected and returned. Replacement order raised.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-02-19", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-106", date:"2023-12-14", raisedBy:"Martin Young", priority:"MAJOR", issueType:"Quality Issue", dept:"Quality", assignedTo:"FSE PipeTec", due:"2024-01-16", desc:"F51572 Holes missing on guard sent to site; galvanizing touch-up incomplete; brackets on guards had to be moved.", immediate:"Guard returned to workshop for rework.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-01-16", repeatTag:"Holes Drilled Incorrect Size / Position", repeatFlag:false },
+  { id:"NCR-107", date:"2024-02-22", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-02-26", desc:"F51516 Disc Filters center barrel drawing 10000302584 — brackets profiled too big.", immediate:"Items held pending supplier correction.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-03-04", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-108", date:"2024-03-01", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-03-05", desc:"F51669 Drawing D0004372280 SHT 14/15 Item 1 bent incorrectly x 8 off.", immediate:"Items returned to supplier.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-03-08", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-109", date:"2024-03-14", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-03-14", desc:"F51516 Drawing 1000816437 Item incorrectly profiled.", immediate:"Item rejected on receipt.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-03-14", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-110", date:"2024-04-23", raisedBy:"Juan Nel", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Stefmet", due:"2024-04-23", desc:"F51714 Drawing 1.515339 REV.0 — PU lining has bubbles; flanges had 6mm rubber lining where PU lining was specified.", immediate:"Items quarantined. Supplier notified.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-05-09", repeatTag:"Rubber / Lining Defect", repeatFlag:false },
+  { id:"NCR-111", date:"2024-05-20", raisedBy:"Pearce Viljoen", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Stefmet", due:"2024-05-20", desc:"Rubber not bonding to material correctly — Inspection Rejected.", immediate:"Items rejected at inspection. Supplier advised.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-05-20", repeatTag:"Rubber / Lining Defect", repeatFlag:false },
+  { id:"NCR-112", date:"2024-06-03", raisedBy:"D. Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2024-06-06", desc:"F51766 Flanges profiled too short and holes profiled too big — 22mm diameter instead of 19mm.", immediate:"Items rejected on receipt. Supplier notified.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-07-04", repeatTag:"Incorrect Profiling / Flanges", repeatFlag:false },
+  { id:"NCR-113", date:"2024-12-10", raisedBy:"Juan Nel", priority:"MAJOR", issueType:"Quality Issue", dept:"Quality", assignedTo:"FSE Internal", due:"2024-12-10", desc:"F51881 — 4 off Standoffs sent to corrosion protection without quality inspector release.", immediate:"Process halted. Items recalled pending QC inspection.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2024-12-10", repeatTag:"QC Release Not Obtained", repeatFlag:false },
+  { id:"NCR-114", date:"2025-01-20", raisedBy:"Minney Roos", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"DC Technical", due:"2025-01-20", desc:"F52003 — Cast Iron Horse Shoe machined incorrectly.", immediate:"Item quarantined pending supplier rework.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2025-01-25", repeatTag:"Incorrect Fabrication / Wrong Dimensions", repeatFlag:false },
+  { id:"NCR-115", date:"2025-03-10", raisedBy:"Martin Young", priority:"MAJOR", issueType:"Quality Issue", dept:"Quality", assignedTo:"FSE PIPETEC Internal", due:"2025-03-10", desc:"P23-191 — Gusset plates not installed as per Drawing.", immediate:"Work stopped on affected area. Drawing reviewed with team.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2025-03-10", repeatTag:"Drawing Not Followed", repeatFlag:false },
+  { id:"NCR-116", date:"2025-04-11", raisedBy:"Willie Storm", priority:"MAJOR", issueType:"Quality Issue", dept:"Supply Chain", assignedTo:"Stefmet", due:"2025-04-08", desc:"F52073 — Metso jacking cradle rubber lining shore hardness incorrect.", immediate:"Items held for supplier inspection.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2025-04-11", repeatTag:"Rubber / Lining Defect", repeatFlag:false },
+  { id:"NCR-117", date:"2025-11-21", raisedBy:"Neandro Pries", priority:"MAJOR", issueType:"Supplier Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2025-11-21", desc:"F52312 — Material incorrectly supplied (MAT-F52312-001).", immediate:"Material rejected and returned to supplier.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2025-11-26", repeatTag:"Supplier Material Non-Conformance", repeatFlag:false },
+  { id:"NCR-118", date:"2025-11-24", raisedBy:"Neandro Pries", priority:"MAJOR", issueType:"Supplier Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2025-11-24", desc:"F52351 — Material incorrectly supplied (MAT-F52351-001).", immediate:"Material rejected and returned to supplier.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2025-11-27", repeatTag:"Supplier Material Non-Conformance", repeatFlag:false },
+  { id:"NCR-119", date:"2026-01-21", raisedBy:"Wayne Potgieter", priority:"MAJOR", issueType:"Supplier Issue", dept:"Supply Chain", assignedTo:"Bekker Steel", due:"2026-01-21", desc:"F52427 — Material incorrectly supplied.", immediate:"Material quarantined pending supplier replacement.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2026-01-26", repeatTag:"Supplier Material Non-Conformance", repeatFlag:false },
+  { id:"NCR-120", date:"2026-02-03", raisedBy:"Wayne Potgieter", priority:"MAJOR", issueType:"Quality Issue", dept:"Quality", assignedTo:"FSE Internal", due:"2026-02-03", desc:"F52453 — Items not as per drawing. Overall lengths and squareness not as per drawing.", immediate:"Items held. Drawing re-issued to workshop.", rootCause:"", corrective:"", preventive:"", status:"Closed", closedDate:"2026-02-10", repeatTag:"Drawing Not Followed", repeatFlag:false },
+];
+
+let selectedPriority = "";
+let selectedIssueType = "";
+let regFilter = "all";
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function isOverdue(ncr) {
+  if (ncr.status === "Closed") return false;
+  if (!ncr.due) return false;
+  return new Date(ncr.due) < new Date();
+}
+function priorityBadge(p) {
+  if (p === "CRITICAL") return `<span class="b-crit">🔴 CRITICAL</span>`;
+  if (p === "MAJOR") return `<span class="b-major">🟠 MAJOR</span>`;
+  return `<span class="b-minor">🟡 MINOR</span>`;
+}
+function statusBadge(ncr) {
+  if (isOverdue(ncr)) return `<span class="b-overdue">⏰ Overdue</span>`;
+  if (ncr.status === "Closed") return `<span class="b-closed">✔ Closed</span>`;
+  if (ncr.status === "In Progress") return `<span class="b-inprog">⚙ In Progress</span>`;
+  return `<span class="b-open">● Open</span>`;
+}
+function rowClass(ncr) {
+  if (ncr.priority === "CRITICAL") return "row-crit";
+  if (ncr.priority === "MAJOR") return "row-major";
+  return "row-minor";
+}
+function getMonths() {
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ label: d.toLocaleString('default',{month:'short'}) + " " + d.getFullYear().toString().slice(2), year: d.getFullYear(), month: d.getMonth() });
+  }
+  return months;
+}
+
+// ═══════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════
+function computeStats() {
+  return {
+    total: NCRs.length,
+    open: NCRs.filter(n => n.status !== "Closed").length,
+    closed: NCRs.filter(n => n.status === "Closed").length,
+    overdue: NCRs.filter(n => isOverdue(n)).length,
+    crit: NCRs.filter(n => n.priority === "CRITICAL" && n.status !== "Closed").length,
+  };
+}
+
+// ═══════════════════════════════════════════════
+// RENDER DASHBOARD SUMMARY
+// ═══════════════════════════════════════════════
+function renderSummary() {
+  const s = computeStats();
+  document.getElementById("s-total").textContent = s.total;
+  document.getElementById("s-open").textContent = s.open;
+  document.getElementById("s-closed").textContent = s.closed;
+  document.getElementById("s-overdue").textContent = s.overdue;
+  document.getElementById("s-crit").textContent = s.crit;
+}
+
+function renderDashCritical() {
+  const rows = NCRs.filter(n => n.priority === "CRITICAL" || isOverdue(n));
+  const tbody = document.getElementById("dash-critical-tbody");
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--green);padding:20px">✔ No critical or overdue NCRs</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(n => `<tr class="${rowClass(n)}">
+    <td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--accent)">${n.id}</td>
+    <td>${n.desc.slice(0,60)}${n.desc.length>60?'…':''}</td>
+    <td>${priorityBadge(n.priority)}</td>
+    <td><span class="cat-tag">${n.dept}</span></td>
+    <td style="color:${isOverdue(n)?'var(--red)':'var(--muted)'}">${n.due||'—'}</td>
+    <td>${statusBadge(n)}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// RENDER REGISTER
+// ═══════════════════════════════════════════════
+function renderRegister() {
+  const banner = document.getElementById("assignee-banner");
+  if (banner) banner.style.display = isAssignee ? "block" : "none";
+  const tbody = document.getElementById("register-tbody");
+  let data = NCRs;
+  if (regFilter !== "all") {
+    if (regFilter === "CRITICAL") data = data.filter(n => n.priority === "CRITICAL");
+    else data = data.filter(n => n.status === regFilter);
+  }
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">No NCRs match this filter</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map((n,i) => `<tr class="${rowClass(n)}">
+    <td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--accent);white-space:nowrap">${n.id}</td>
+    <td style="color:var(--muted);white-space:nowrap">${n.date}</td>
+    <td>${n.desc.slice(0,50)}${n.desc.length>50?'…':''} ${n.repeatFlag?'<span style="font-size:10px;color:var(--red);font-weight:700">🔁 REPEAT</span>':''}</td>
+    <td class="hide-sm"><span class="cat-tag" style="background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.2)">${n.issueType}</span>${n.repeatTag?`<br><span style="font-size:9px;color:var(--muted);letter-spacing:0.5px">🏷 ${n.repeatTag}</span>`:''}</td>
+    <td>${priorityBadge(n.priority)}</td>
+    <td class="hide-sm"><span class="cat-tag">${n.dept}</span></td>
+    <td class="hide-sm" style="color:var(--muted)">${n.assignedTo}</td>
+    <td style="color:${isOverdue(n)?'var(--red)':'var(--muted)'}; white-space:nowrap">${n.due||'—'}</td>
+    <td>${statusBadge(n)}</td>
+    <td><button style="background:none;border:1px solid ${isAssignee?'var(--blue)':'var(--border)'};border-radius:6px;padding:4px 10px;color:${isAssignee?'var(--blue)':'var(--accent)'};cursor:pointer;font-size:11px;white-space:nowrap" onclick="openModal(${NCRs.indexOf(n)})">${isAdmin?'View / Edit':isAssignee?'Complete Actions':'View'}</button></td>
+  </tr>`).join('');
+}
+
+function filterReg(f, btn) {
+  regFilter = f;
+  document.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderRegister();
+}
+
+// ═══════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════
+function openModal(idx) {
+  const n = NCRs[idx];
+  const overlay = document.getElementById("modal-overlay");
+  const box = document.getElementById("modal-box");
+
+  // Assignee-editable fields: rootCause, corrective, preventive only
+  const assigneeFields = ['rootCause','corrective','preventive'];
+  
+  const fieldHTML = (label, val, fieldKey, type="input") => {
+    const canEdit = isAdmin || (isAssignee && assigneeFields.includes(fieldKey));
+    if (canEdit) {
+      if (type === "select-status") return isAdmin ? `<div class="modal-field"><label>${label}</label>
+        <select class="modal-edit-select" onchange="NCRs[${idx}]['${fieldKey}']=this.value;refreshAll()">
+          <option ${val==='Open'?'selected':''}>Open</option>
+          <option ${val==='In Progress'?'selected':''}>In Progress</option>
+          <option ${val==='Closed'?'selected':''}>Closed</option>
+        </select></div>` : `<div class="modal-field"><label>${label}</label><span>${val||'—'}</span></div>`;
+      if (type === "textarea") return `<div class="modal-field" style="grid-column:1/-1"><label>${label} ${isAssignee && assigneeFields.includes(fieldKey) ? '<span style="color:var(--blue);font-size:9px">✏ YOUR ACTION</span>' : ''}</label>
+        <textarea class="modal-edit-textarea" rows="3" onchange="NCRs[${idx}]['${fieldKey}']=this.value;refreshAll()">${val||''}</textarea></div>`;
+      return `<div class="modal-field"><label>${label}</label>
+        <input type="${type==='date'?'date':'text'}" class="modal-edit-input" value="${val||''}" onchange="NCRs[${idx}]['${fieldKey}']=this.value;refreshAll()"></div>`;
+    } else {
+      return `<div class="modal-field"><label>${label}</label><span>${val||'—'}</span></div>`;
+    }
+  };
+
+  box.innerHTML = `
+    <div class="modal-title">
+      <span>${n.id} ${n.repeatFlag?'<span style="font-size:11px;color:var(--red)">🔁 REPEAT</span>':''}</span>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      ${priorityBadge(n.priority)} ${statusBadge(n)}
+      <span class="cat-tag">${n.dept}</span>
+      <span style="font-size:11px;color:var(--muted)">Raised: ${n.date} by ${n.raisedBy}</span>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Details</div>
+      <div class="modal-grid">
+        ${fieldHTML('Assigned To', n.assignedTo, 'assignedTo')}
+        ${fieldHTML('Due Date', n.due, 'due', 'date')}
+        ${fieldHTML('Status', n.status, 'status', 'select-status')}
+        ${fieldHTML('Closed Date', n.closedDate, 'closedDate', 'date')}
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Non-Conformance</div>
+      <div class="modal-grid">
+        ${fieldHTML('Description', n.desc, 'desc', 'textarea')}
+        ${fieldHTML('Immediate Action', n.immediate, 'immediate', 'textarea')}
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Investigation &amp; Actions</div>
+      <div class="modal-grid">
+        ${fieldHTML('Root Cause', n.rootCause, 'rootCause', 'textarea')}
+        ${fieldHTML('Corrective Action', n.corrective, 'corrective', 'textarea')}
+        ${fieldHTML('Preventive Action', n.preventive, 'preventive', 'textarea')}
+      </div>
+    </div>
+    ${(isAdmin || isAssignee) ? `<button class="modal-save-btn" style="${isAssignee ? 'background:var(--blue)' : ''}" onclick="closeModal();refreshAll()">✅ ${isAssignee ? 'Save My Actions' : 'Save & Close'}</button>` : ''}
+    ${isAssignee ? `<p style="font-size:10px;color:var(--muted);margin-top:8px">✏️ You can update Root Cause, Corrective &amp; Preventive Actions only. Admin closes the NCR.</p>` : ''}
+  `;
+  overlay.classList.add("open");
+}
+function closeModal() { document.getElementById("modal-overlay").classList.remove("open"); }
+document.getElementById("modal-overlay").addEventListener("click", e => { if (e.target === document.getElementById("modal-overlay")) closeModal(); });
+
+// ═══════════════════════════════════════════════
+// FORM
+// ═══════════════════════════════════════════════
+function selectPriority(p, btn) {
+  selectedPriority = p;
+  document.querySelectorAll(".priority-btn").forEach(b => b.className = "priority-btn");
+  if (p === "CRITICAL") { btn.classList.add("sel-crit"); setDueDate(1); }
+  else if (p === "MAJOR") { btn.classList.add("sel-major"); setDueDate(7); }
+  else { btn.classList.add("sel-minor"); setDueDate(14); }
+}
+function setDueDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  document.getElementById("f-due").value = d.toISOString().split('T')[0];
+}
+function selectIssue(btn) {
+  document.querySelectorAll(".issue-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedIssueType = btn.textContent.trim();
+}
+function nextNCRNum() {
+  // Find highest NCR number and increment
+  const nums = NCRs.map(n => {
+    const m = n.id.match(/NCR-(\d+)/);
+    return m ? parseInt(m[1]) : 0;
+  });
+  const next = Math.max(...nums, 120) + 1;
+  return `NCR-${next}`;
+}
+function initForm() {
+  document.getElementById("f-ncr-num").value = nextNCRNum();
+  document.getElementById("f-date").value = new Date().toISOString().split('T')[0];
+}
+function checkOtherTag(val) {
+  const wrap = document.getElementById("other-tag-wrap");
+  wrap.style.display = val === "Other (type below)" ? "block" : "none";
+  if (val !== "Other (type below)") document.getElementById("f-other-tag").value = "";
+}
+
+function getRepeatTag() {
+  const sel = document.getElementById("f-repeat-tag").value;
+  if (sel === "Other (type below)") return document.getElementById("f-other-tag").value.trim() || "Other";
+  return sel;
+}
+
+function autoFlagRepeats() {
+  // Count occurrences of each tag
+  const tagCount = {};
+  NCRs.forEach(n => { if (n.repeatTag) tagCount[n.repeatTag] = (tagCount[n.repeatTag]||0)+1; });
+  // Flag any NCR whose tag appears 3+ times
+  NCRs.forEach(n => {
+    if (n.repeatTag && tagCount[n.repeatTag] >= 3) n.repeatFlag = true;
+    else n.repeatFlag = false;
+  });
+}
+
+function submitNCR() {
+  if (!isAdmin) { showVOToast(); return; }
+  const desc = document.getElementById("f-desc").value.trim();
+  const dept = document.getElementById("f-dept").value;
+  if (!desc || !dept || !selectedPriority || !selectedIssueType) {
+    alert("Please fill in: Description, Department, Priority and Issue Type.");
+    return;
+  }
+  const repeatTag = getRepeatTag();
+  const ncr = {
+    id: nextNCRNum(),
+    date: document.getElementById("f-date").value,
+    raisedBy: document.getElementById("f-raised-by").value || "Admin",
+    priority: selectedPriority,
+    issueType: selectedIssueType,
+    dept, 
+    assignedTo: document.getElementById("f-assigned").value,
+    due: document.getElementById("f-due").value,
+    desc,
+    immediate: document.getElementById("f-immediate").value,
+    rootCause: document.getElementById("f-rootcause").value,
+    corrective: document.getElementById("f-corrective").value,
+    preventive: document.getElementById("f-preventive").value,
+    status: "Open",
+    closedDate: "",
+    repeatTag: repeatTag,
+    repeatFlag: false,
+  };
+  NCRs.push(ncr);
+  autoFlagRepeats();
+  // Reset form
+  ["f-raised-by","f-assigned","f-desc","f-immediate","f-rootcause","f-corrective","f-preventive","f-other-tag"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("f-dept").value = "";
+  document.getElementById("f-repeat-tag").value = "";
+  document.getElementById("other-tag-wrap").style.display = "none";
+  selectedPriority = ""; selectedIssueType = "";
+  document.querySelectorAll(".priority-btn").forEach(b => b.className = "priority-btn");
+  document.querySelectorAll(".issue-btn").forEach(b => b.classList.remove("selected"));
+  initForm();
+  const msg = document.getElementById("form-msg");
+  msg.style.display = "inline";
+  setTimeout(() => msg.style.display = "none", 3000);
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════
+let charts = {};
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function initDashCharts() {
+  const months = getMonths();
+  const raised = months.map(m => NCRs.filter(n => { const d = new Date(n.date); return d.getFullYear()===m.year && d.getMonth()===m.month; }).length);
+  const closed = months.map(m => NCRs.filter(n => { if (!n.closedDate) return false; const d = new Date(n.closedDate); return d.getFullYear()===m.year && d.getMonth()===m.month; }).length);
+
+  destroyChart('monthly');
+  charts.monthly = new Chart(document.getElementById("chart-monthly"), {
+    type:"bar", data:{ labels: months.map(m=>m.label),
+      datasets:[
+        { label:"Raised", data:raised, backgroundColor:"rgba(239,68,68,.65)", borderRadius:4 },
+        { label:"Closed", data:closed, backgroundColor:"rgba(16,185,129,.65)", borderRadius:4 }
+      ]},
+    options:{ responsive:true, maintainAspectRatio:true, scales:{ y:{grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, x:{grid:{display:false},ticks:{color:"#64748b"}} }, plugins:{ legend:{ labels:{ color:"#94a3b8", font:{size:11} } } } }
+  });
+
+  const s = computeStats();
+  destroyChart('status');
+  charts.status = new Chart(document.getElementById("chart-status"), {
+    type:"doughnut", data:{ labels:["Open","In Progress","Closed","Overdue"],
+      datasets:[{ data:[NCRs.filter(n=>n.status==="Open"&&!isOverdue(n)).length, NCRs.filter(n=>n.status==="In Progress").length, s.closed, s.overdue], backgroundColor:["#3b82f6","#e8a020","#10b981","#ef4444"], borderWidth:0 }]},
+    options:{ responsive:true, maintainAspectRatio:true, cutout:"65%", plugins:{ legend:{ position:"bottom", labels:{ color:"#94a3b8", font:{size:11} } } } }
+  });
+
+  const pCounts = ["CRITICAL","MAJOR","MINOR"].map(p => NCRs.filter(n=>n.priority===p).length);
+  destroyChart('priority');
+  charts.priority = new Chart(document.getElementById("chart-priority"), {
+    type:"bar", data:{ labels:["Critical","Major","Minor"],
+      datasets:[{ data:pCounts, backgroundColor:["rgba(220,38,38,.7)","rgba(245,158,11,.7)","rgba(16,185,129,.7)"], borderRadius:6 }]},
+    options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{ display:false } }, scales:{ y:{grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, x:{grid:{display:false},ticks:{color:"#64748b"}} } }
+  });
+
+  // By issue type
+  const typeMap = {};
+  NCRs.forEach(n => { typeMap[n.issueType] = (typeMap[n.issueType]||0)+1; });
+  destroyChart('type');
+  charts.type = new Chart(document.getElementById("chart-type"), {
+    type:"bar", data:{ labels: Object.keys(typeMap), datasets:[{ data:Object.values(typeMap), backgroundColor:"rgba(59,130,246,.65)", borderRadius:4 }]},
+    options:{ responsive:true, maintainAspectRatio:true, indexAxis:'y', plugins:{ legend:{display:false} }, scales:{ x:{grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, y:{grid:{display:false},ticks:{color:"#64748b",font:{size:10}}} } }
+  });
+
+  // By dept
+  const deptMap = {};
+  NCRs.forEach(n => { deptMap[n.dept] = (deptMap[n.dept]||0)+1; });
+  destroyChart('dept');
+  charts.dept = new Chart(document.getElementById("chart-dept"), {
+    type:"doughnut", data:{ labels: Object.keys(deptMap), datasets:[{ data:Object.values(deptMap), backgroundColor:["#3b82f6","#e8a020","#10b981","#ef4444","#8b5cf6","#06b6d4","#f97316"], borderWidth:0 }]},
+    options:{ responsive:true, maintainAspectRatio:true, cutout:"55%", plugins:{ legend:{ position:"bottom", labels:{ color:"#94a3b8", font:{size:10} } } } }
+  });
+}
+
+function initFullCharts() {
+  // Repeat NCRs — by specific issue tag (3+ = REPEAT)
+  const tagCount = {};
+  NCRs.forEach(n => { if (n.repeatTag) tagCount[n.repeatTag] = (tagCount[n.repeatTag]||0)+1; });
+  const repeatTags = Object.entries(tagCount).filter(([k,v])=>v>=3).sort((a,b)=>b[1]-a[1]);
+  const repeatLabels = repeatTags.length ? repeatTags.map(([k])=> k.length>28?k.slice(0,28)+'…':k) : ["No repeats (3+ threshold)"];
+  const repeatData = repeatTags.length ? repeatTags.map(([,v])=>v) : [0];
+  destroyChart('repeat');
+  charts.repeat = new Chart(document.getElementById("chart-repeat"), {
+    type:"bar",
+    data:{ labels: repeatLabels,
+      datasets:[{ data: repeatData,
+        backgroundColor: repeatData.map(v => v>=5?"rgba(220,38,38,.8)":v>=3?"rgba(245,158,11,.75)":"rgba(59,130,246,.65)"),
+        borderRadius:4 }]},
+    options:{ responsive:true, maintainAspectRatio:true,
+      indexAxis:'y',
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ label: ctx => ` ${ctx.raw} occurrences${ctx.raw>=3?' 🔁 REPEAT':''}` } } },
+      scales:{ x:{grid:{color:"#1e2d45"},ticks:{color:"#64748b",stepSize:1}}, y:{grid:{display:false},ticks:{color:"#64748b",font:{size:10}}} } }
+  });
+
+  // Closure rate by priority
+  const priorities = ["CRITICAL","MAJOR","MINOR"];
+  const closureRates = priorities.map(p => {
+    const total = NCRs.filter(n=>n.priority===p).length;
+    const closed = NCRs.filter(n=>n.priority===p&&n.status==="Closed").length;
+    return total ? Math.round(closed/total*100) : 0;
+  });
+  destroyChart('closure');
+  charts.closure = new Chart(document.getElementById("chart-closure"), {
+    type:"bar", data:{ labels:priorities, datasets:[{ label:"% Closed", data:closureRates, backgroundColor:["rgba(220,38,38,.65)","rgba(245,158,11,.65)","rgba(16,185,129,.65)"], borderRadius:6 }]},
+    options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{ y:{max:100,grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, x:{grid:{display:false},ticks:{color:"#64748b"}} } }
+  });
+
+  // Trend
+  const months = getMonths();
+  destroyChart('trend');
+  charts.trend = new Chart(document.getElementById("chart-trend"), {
+    type:"line", data:{ labels: months.map(m=>m.label),
+      datasets:[
+        { label:"Raised", data: months.map(m=>NCRs.filter(n=>{const d=new Date(n.date);return d.getFullYear()===m.year&&d.getMonth()===m.month;}).length), borderColor:"#ef4444", backgroundColor:"rgba(239,68,68,.1)", tension:.4, fill:true, pointRadius:4 },
+        { label:"Closed", data: months.map(m=>NCRs.filter(n=>{if(!n.closedDate)return false;const d=new Date(n.closedDate);return d.getFullYear()===m.year&&d.getMonth()===m.month;}).length), borderColor:"#10b981", backgroundColor:"rgba(16,185,129,.1)", tension:.4, fill:true, pointRadius:4 },
+      ]},
+    options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}}, scales:{ y:{grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, x:{grid:{display:false},ticks:{color:"#64748b"}} } }
+  });
+
+  // Dept open vs closed
+  const depts = [...new Set(NCRs.map(n=>n.dept))];
+  destroyChart('dept2');
+  charts.dept2 = new Chart(document.getElementById("chart-dept2"), {
+    type:"bar", data:{ labels:depts,
+      datasets:[
+        { label:"Open", data:depts.map(d=>NCRs.filter(n=>n.dept===d&&n.status!=="Closed").length), backgroundColor:"rgba(59,130,246,.65)", borderRadius:4 },
+        { label:"Closed", data:depts.map(d=>NCRs.filter(n=>n.dept===d&&n.status==="Closed").length), backgroundColor:"rgba(16,185,129,.65)", borderRadius:4 },
+      ]},
+    options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}}}, scales:{ y:{grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, x:{grid:{display:false},ticks:{color:"#64748b",font:{size:10}}} } }
+  });
+
+  // Avg days to close
+  const avgDays = priorities.map(p => {
+    const closed = NCRs.filter(n=>n.priority===p&&n.status==="Closed"&&n.closedDate);
+    if (!closed.length) return 0;
+    const total = closed.reduce((sum,n) => sum + Math.round((new Date(n.closedDate)-new Date(n.date))/(1000*60*60*24)), 0);
+    return Math.round(total/closed.length);
+  });
+  destroyChart('avgdays');
+  charts.avgdays = new Chart(document.getElementById("chart-avgdays"), {
+    type:"bar", data:{ labels:priorities, datasets:[{ label:"Avg Days", data:avgDays, backgroundColor:["rgba(220,38,38,.65)","rgba(245,158,11,.65)","rgba(16,185,129,.65)"], borderRadius:6 }]},
+    options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{ y:{grid:{color:"#1e2d45"},ticks:{color:"#64748b"}}, x:{grid:{display:false},ticks:{color:"#64748b"}} } }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function showTab(id, btn) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-"+id).classList.add("active");
+  btn.classList.add("active");
+  if (id === "dashboard") setTimeout(initDashCharts, 50);
+  if (id === "charts") setTimeout(initFullCharts, 50);
+  if (id === "register") renderRegister();
+  if (id === "new") initForm();
+}
+
+// ═══════════════════════════════════════════════
+// PRINT
+// ═══════════════════════════════════════════════
+function printView() { window.print(); }
+function printAll() {
+  document.querySelectorAll(".view").forEach(v => v.style.display = "block");
+  setTimeout(() => {
+    window.print();
+    document.querySelectorAll(".view").forEach(v => { v.style.display = "none"; v.classList.remove("active"); });
+    document.getElementById("view-dashboard").style.display = "block";
+    document.getElementById("view-dashboard").classList.add("active");
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab")[0].classList.add("active");
+  }, 400);
+}
+
+// ═══════════════════════════════════════════════
+// REFRESH ALL
+// ═══════════════════════════════════════════════
+function refreshAll() {
+  renderSummary();
+  renderDashCritical();
+  renderRegister();
+  if (document.getElementById("view-dashboard").classList.contains("active")) initDashCharts();
+  if (document.getElementById("view-charts").classList.contains("active")) initFullCharts();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+autoFlagRepeats();
+renderSummary();
+renderDashCritical();
+setTimeout(initDashCharts, 100);
+</script>
+</body>
+</html>
