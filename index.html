@@ -183,6 +183,50 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
   .brand-name{font-size:16px;}
   .login-logo{width:38px;height:38px;}
 }
+
+  /* ── INDIVIDUAL NCR PRINT ── */
+  @media print {
+    .no-print { display: none !important; }
+    .print-only { display: block !important; }
+    #modal-overlay { position: relative !important; display: block !important; background: none !important; padding: 0 !important; }
+    .modal-box { max-height: none !important; box-shadow: none !important; border: 1px solid #ccc !important; }
+    body { background: white !important; color: black !important; }
+    header, .tabs, #vo-toast, #login-overlay { display: none !important; }
+    main { padding: 0 !important; }
+    .view { display: none !important; }
+    #print-ncr-frame { display: block !important; }
+  }
+
+  #print-ncr-frame {
+    display: none;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+
+  .ncr-print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #e8a020;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .ncr-print-title { font-size: 18px; font-weight: bold; color: #000; }
+  .ncr-print-meta { font-size: 11px; color: #555; }
+  .ncr-print-section { margin-bottom: 14px; }
+  .ncr-print-section-title { font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #e8a020; background: #f8f8f8; padding: 4px 8px; border-left: 4px solid #e8a020; margin-bottom: 8px; }
+  .ncr-print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ncr-print-field label { font-size: 10px; font-weight: bold; color: #555; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px; }
+  .ncr-print-field span { font-size: 12px; color: #000; }
+  .ncr-print-field.full { grid-column: 1 / -1; }
+  .ncr-print-text { background: #f9f9f9; border: 1px solid #ddd; padding: 8px; border-radius: 4px; min-height: 40px; font-size: 12px; line-height: 1.5; }
+  .ncr-print-footer { border-top: 1px solid #ccc; padding-top: 10px; margin-top: 16px; font-size: 10px; color: #777; display: flex; justify-content: space-between; }
+  .priority-crit-print { background: #fee2e2; color: #dc2626; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+  .priority-major-print { background: #fef3c7; color: #d97706; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+  .priority-minor-print { background: #d1fae5; color: #059669; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+
 </style>
 </head>
 <body>
@@ -801,6 +845,7 @@ function openModal(idx) {
       </div>
     </div>
     ${(isAdmin || isAssignee) ? `<button class="modal-save-btn" style="${isAssignee ? 'background:var(--blue)' : ''}" onclick="closeModal();refreshAll()">✅ ${isAssignee ? 'Save My Actions' : 'Save & Close'}</button>` : ''}
+    <button class="modal-save-btn no-print" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);margin-left:8px" onclick="printSingleNCR(${idx})">🖨️ Print This NCR</button>
     ${isAssignee ? `<p style="font-size:10px;color:var(--muted);margin-top:8px">✏️ You can update Root Cause, Corrective &amp; Preventive Actions only. Admin closes the NCR.</p>` : ''}
   `;
   overlay.classList.add("open");
@@ -1065,6 +1110,72 @@ function printAll() {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".tab")[0].classList.add("active");
   }, 400);
+}
+
+function printSingleNCR(idx) {
+  const n = NCRs[idx];
+  const pClass = n.priority === 'CRITICAL' ? 'priority-crit-print' : n.priority === 'MAJOR' ? 'priority-major-print' : 'priority-minor-print';
+  const today = new Date().toLocaleDateString('en-ZA');
+  const frame = document.getElementById('print-ncr-frame');
+  frame.innerHTML = `
+    <div class="ncr-print-header">
+      <div>
+        <div class="ncr-print-title">NON CONFORMANCE AND CORRECTIVE ACTION REPORT</div>
+        <div class="ncr-print-meta">FSE | Field Services &amp; Engineering &nbsp;&middot;&nbsp; Doc No: FSE-QR-NCR-008 &nbsp;&middot;&nbsp; Printed: ${today}</div>
+      </div>
+      <span class="${pClass}">${n.priority}</span>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">NCR Details</div>
+      <div class="ncr-print-grid">
+        <div class="ncr-print-field"><label>NCR Number</label><span><strong>${n.id}</strong></span></div>
+        <div class="ncr-print-field"><label>Date Raised</label><span>${n.date}</span></div>
+        <div class="ncr-print-field"><label>Raised By</label><span>${n.raisedBy}</span></div>
+        <div class="ncr-print-field"><label>Assigned To</label><span>${n.assignedTo}</span></div>
+        <div class="ncr-print-field"><label>Issue Type</label><span>${n.issueType}</span></div>
+        <div class="ncr-print-field"><label>Department</label><span>${n.dept}</span></div>
+        <div class="ncr-print-field"><label>Due Date</label><span>${n.due || '&mdash;'}</span></div>
+        <div class="ncr-print-field"><label>Status</label><span>${n.status}${n.closedDate ? ' &mdash; Closed: ' + n.closedDate : ''}</span></div>
+      </div>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">Description of Non-Conformance</div>
+      <div class="ncr-print-text">${n.desc || '&mdash;'}</div>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">Immediate Action Taken</div>
+      <div class="ncr-print-text">${n.immediate || '&mdash;'}</div>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">Root Cause (5 Why Analysis)</div>
+      <div class="ncr-print-text">${n.rootCause || '&mdash;'}</div>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">Corrective Action</div>
+      <div class="ncr-print-text">${n.corrective || '&mdash;'}</div>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">Preventive Action</div>
+      <div class="ncr-print-text">${n.preventive || '&mdash;'}</div>
+    </div>
+    <div class="ncr-print-section">
+      <div class="ncr-print-section-title">Repeat Issue Tag</div>
+      <div class="ncr-print-text">${n.repeatTag || '&mdash;'} ${n.repeatFlag ? '&#x1F501; REPEAT ISSUE' : ''}</div>
+    </div>
+    <div class="ncr-print-footer">
+      <span>FSE | Field Services &amp; Engineering &nbsp;&middot;&nbsp; NCR Management System</span>
+      <span>${n.id} &nbsp;&middot;&nbsp; ${n.priority} &nbsp;&middot;&nbsp; ${n.status}</span>
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.querySelectorAll('header, .tabs, main').forEach(el => el.style.display = 'none');
+  frame.style.display = 'block';
+  setTimeout(() => {
+    window.print();
+    frame.style.display = 'none';
+    frame.innerHTML = '';
+    document.querySelectorAll('header, .tabs, main').forEach(el => el.style.display = '');
+  }, 300);
 }
 
 // ═══════════════════════════════════════════════
