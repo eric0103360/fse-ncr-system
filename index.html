@@ -187,14 +187,10 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
   /* ── INDIVIDUAL NCR PRINT ── */
   @media print {
     .no-print { display: none !important; }
-    .print-only { display: block !important; }
-    #modal-overlay { position: relative !important; display: block !important; background: none !important; padding: 0 !important; }
-    .modal-box { max-height: none !important; box-shadow: none !important; border: 1px solid #ccc !important; }
-    body { background: white !important; color: black !important; }
-    header, .tabs, #vo-toast, #login-overlay { display: none !important; }
-    main { padding: 0 !important; }
-    .view { display: none !important; }
-    #print-ncr-frame { display: block !important; }
+    body { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
+    body * { visibility: hidden !important; }
+    #print-ncr-frame, #print-ncr-frame * { visibility: visible !important; display: block !important; }
+    #print-ncr-frame { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; padding: 20px !important; }
   }
 
   #print-ncr-frame {
@@ -227,6 +223,387 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
   .priority-major-print { background: #fef3c7; color: #d97706; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
   .priority-minor-print { background: #d1fae5; color: #059669; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
 
+
+  /* ── WORKFLOW STATUS BADGES ── */
+  .b-awaiting { display:inline-flex;align-items:center;background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap; }
+  .b-rejected  { display:inline-flex;align-items:center;background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap; }
+
+  /* ── ADMIN ALERT BANNER ── */
+  #admin-alert-banner {
+    display:none;
+    background:linear-gradient(90deg,rgba(168,85,247,.12),rgba(239,68,68,.08));
+    border:1px solid rgba(168,85,247,.3);
+    border-radius:10px;
+    padding:14px 20px;
+    margin-bottom:16px;
+    gap:16px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .alert-item {
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:600;
+  }
+  .alert-count {
+    font-family:'Rajdhani',sans-serif;
+    font-size:28px;font-weight:700;line-height:1;
+  }
+  .alert-label { font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px; }
+
+  /* ── REJECTION MODAL ── */
+  #reject-modal {
+    position:fixed;inset:0;z-index:600;
+    background:rgba(0,0,0,.7);
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  #reject-modal.open { display:flex; }
+  .reject-box {
+    background:var(--surface);border:1px solid var(--border);
+    border-top:3px solid var(--red);border-radius:14px;
+    padding:28px;width:100%;max-width:480px;
+  }
+  .reject-title { font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:16px; }
+
+  /* ── ASSIGNEE SIGN OFF ── */
+  .signoff-box {
+    background:rgba(168,85,247,.06);
+    border:1px solid rgba(168,85,247,.25);
+    border-radius:10px;padding:16px;margin-top:14px;
+  }
+  .signoff-title { font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#a855f7;margin-bottom:12px; }
+  .signoff-check { display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;font-size:12px;color:var(--text);line-height:1.5; }
+  .signoff-check input[type=checkbox] { margin-top:2px;accent-color:#a855f7;width:16px;height:16px;flex-shrink:0; }
+  .signoff-btn {
+    padding:10px 20px;background:#a855f7;color:#fff;
+    border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;
+    font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  }
+  .signoff-btn:hover { background:#9333ea; }
+  .signoff-btn:disabled { opacity:.4;cursor:not-allowed; }
+
+  /* ── APPROVE / REJECT BUTTONS ── */
+  .approve-btn {
+    padding:10px 20px;background:var(--green);color:#fff;
+    border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;
+    font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  }
+  .approve-btn:hover { background:#059669; }
+  .reject-action-btn {
+    padding:10px 20px;background:transparent;color:var(--red);
+    border:1px solid var(--red);border-radius:8px;font-family:'Rajdhani',sans-serif;
+    font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-left:8px;
+  }
+  .reject-action-btn:hover { background:rgba(239,68,68,.1); }
+
+  /* ── OVERDUE PULSE ── */
+  .overdue-row td { background:rgba(239,68,68,.05) !important; }
+
+
+  /* ── PUBLIC SUBMISSION FORM ── */
+  #public-submit-overlay {
+    position:fixed;inset:0;z-index:9998;
+    background:linear-gradient(135deg,#0a0e1a,#0d1420,#111827);
+    display:flex;align-items:flex-start;justify-content:center;
+    flex-direction:column;padding:20px;
+    overflow-y:auto;
+  }
+  .public-form-box {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-top:3px solid var(--accent);
+    border-radius:14px;
+    padding:24px;
+    width:100%;max-width:580px;
+    box-shadow:0 24px 80px rgba(0,0,0,.6);
+    margin:auto;
+  }
+  .public-form-title {
+    font-family:'Rajdhani',sans-serif;
+    font-size:20px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;
+    color:var(--accent);margin-bottom:4px;
+  }
+  .public-form-sub {
+    font-size:11px;color:var(--muted);
+    letter-spacing:1px;margin-bottom:24px;
+  }
+  .public-submit-btn {
+    width:100%;padding:13px;
+    background:var(--accent);color:#000;
+    border:none;border-radius:8px;
+    font-family:'Rajdhani',sans-serif;
+    font-size:15px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;
+    cursor:pointer;transition:all .2s;margin-top:8px;
+  }
+  .public-submit-btn:hover { background:var(--accent2); }
+  .public-success-msg {
+    display:none;
+    background:rgba(16,185,129,.1);
+    border:1px solid rgba(16,185,129,.3);
+    border-radius:10px;padding:20px;
+    text-align:center;margin-top:16px;
+  }
+  .public-success-msg .check { font-size:36px;margin-bottom:8px; }
+  .public-success-msg p { font-size:13px;color:var(--green); }
+
+  /* ── PENDING QUEUE BADGE ── */
+  .pending-badge {
+    display:inline-flex;align-items:center;
+    background:rgba(234,179,8,.12);
+    border:1px solid rgba(234,179,8,.3);
+    border-radius:20px;padding:2px 10px;
+    font-size:10px;font-weight:600;
+    color:#eab308;white-space:nowrap;
+  }
+  .b-pending { display:inline-flex;align-items:center;background:rgba(234,179,8,.12);color:#eab308;border:1px solid rgba(234,179,8,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:600;white-space:nowrap; }
+
+  /* ── PENDING REVIEW CARD ── */
+  .pending-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:4px solid #eab308;
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .pending-card-header {
+    display:flex;align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;gap:8px;
+    margin-bottom:10px;
+  }
+  .pending-card-name { font-weight:600;font-size:14px; }
+  .pending-card-meta { font-size:11px;color:var(--muted); }
+  .pending-card-desc {
+    font-size:12px;color:var(--text);
+    background:rgba(255,255,255,.03);
+    border-radius:6px;padding:8px 10px;
+    line-height:1.5;margin-bottom:10px;
+  }
+  .accept-btn {
+    padding:7px 16px;background:var(--green);color:#fff;
+    border:none;border-radius:6px;
+    font-family:'Rajdhani',sans-serif;
+    font-size:12px;font-weight:700;
+    letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  }
+  .accept-btn:hover { background:#059669; }
+  .decline-btn {
+    padding:7px 16px;background:transparent;color:var(--red);
+    border:1px solid var(--red);border-radius:6px;
+    font-family:'Rajdhani',sans-serif;
+    font-size:12px;font-weight:700;
+    letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-left:8px;
+  }
+  .decline-btn:hover { background:rgba(239,68,68,.1); }
+
+
+  /* ── LOGIN ALERT POPUP ── */
+  #login-alert-popup {
+    position:fixed;inset:0;z-index:9997;
+    background:rgba(0,0,0,.7);
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  #login-alert-popup.open { display:flex; }
+  .login-alert-box {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-top:3px solid var(--red);
+    border-radius:14px;
+    padding:28px;width:100%;max-width:480px;
+    box-shadow:0 24px 80px rgba(0,0,0,.6);
+    animation: popIn 0.3s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .login-alert-title {
+    font-family:'Rajdhani',sans-serif;
+    font-size:20px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;
+    color:var(--accent);margin-bottom:6px;
+  }
+  .login-alert-sub {
+    font-size:11px;color:var(--muted);
+    letter-spacing:1px;margin-bottom:20px;
+  }
+  .alert-stat-grid {
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:10px;margin-bottom:20px;
+  }
+  .alert-stat-card {
+    border-radius:8px;padding:14px;text-align:center;
+  }
+  .alert-stat-num {
+    font-family:'Rajdhani',sans-serif;
+    font-size:36px;font-weight:700;line-height:1;
+  }
+  .alert-stat-lbl {
+    font-size:10px;letter-spacing:1.5px;
+    text-transform:uppercase;margin-top:4px;
+  }
+  .dismiss-btn {
+    width:100%;padding:12px;
+    background:var(--accent);color:#000;
+    border:none;border-radius:8px;
+    font-family:'Rajdhani',sans-serif;
+    font-size:14px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;
+    cursor:pointer;transition:all .2s;
+  }
+  .dismiss-btn:hover { background:var(--accent2); }
+
+
+  /* ── NCR FLOW GUIDE ── */
+  #flow-overlay {
+    position:fixed;inset:0;z-index:9996;
+    background:var(--bg);
+    display:none;overflow-y:auto;
+    padding:24px;
+  }
+  #flow-overlay.open { display:block; }
+  .flow-container { max-width:860px;margin:0 auto;padding-bottom:60px; }
+  .flow-header {
+    display:flex;align-items:center;gap:16px;
+    border-bottom:3px solid var(--accent);
+    padding-bottom:16px;margin-bottom:28px;
+  }
+  .flow-header-title {
+    font-family:'Rajdhani',sans-serif;
+    font-size:24px;font-weight:700;
+    letter-spacing:3px;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .flow-header-sub { font-size:11px;color:var(--muted);letter-spacing:1.5px;margin-top:3px; }
+  .flow-back-btn {
+    margin-left:auto;
+    padding:8px 18px;background:transparent;
+    border:1px solid var(--border);border-radius:8px;
+    font-family:'Rajdhani',sans-serif;font-size:13px;
+    font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--muted);cursor:pointer;transition:all .2s;
+  }
+  .flow-back-btn:hover { border-color:var(--accent);color:var(--accent); }
+
+  /* DIAGRAM */
+  .flow-diagram {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:24px;margin-bottom:24px;
+    overflow-x:auto;
+  }
+  .flow-diagram-title {
+    font-family:'Rajdhani',sans-serif;font-size:13px;
+    font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    color:var(--accent);margin-bottom:20px;
+  }
+  .flow-steps-row {
+    display:flex;align-items:center;
+    gap:0;flex-wrap:nowrap;
+    min-width:600px;
+  }
+  .flow-step-box {
+    flex:1;border-radius:8px;padding:12px 10px;
+    text-align:center;position:relative;
+    border:1px solid var(--border);
+  }
+  .flow-step-num {
+    font-family:'Rajdhani',sans-serif;
+    font-size:11px;font-weight:700;
+    letter-spacing:1px;margin-bottom:4px;
+    opacity:.7;
+  }
+  .flow-step-icon { font-size:20px;margin-bottom:6px; }
+  .flow-step-label {
+    font-size:11px;font-weight:600;
+    line-height:1.3;
+  }
+  .flow-step-role {
+    font-size:9px;margin-top:4px;
+    letter-spacing:1px;text-transform:uppercase;opacity:.6;
+  }
+  .flow-arrow {
+    font-size:18px;color:var(--accent);
+    padding:0 4px;flex-shrink:0;
+  }
+  .flow-step-originator { background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3); }
+  .flow-step-originator .flow-step-num,.flow-step-originator .flow-step-label { color:#60a5fa; }
+  .flow-step-system { background:rgba(232,160,32,.1);border-color:rgba(232,160,32,.3); }
+  .flow-step-system .flow-step-num,.flow-step-system .flow-step-label { color:var(--accent); }
+  .flow-step-admin { background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.3); }
+  .flow-step-admin .flow-step-num,.flow-step-admin .flow-step-label { color:#c084fc; }
+  .flow-step-assignee { background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3); }
+  .flow-step-assignee .flow-step-num,.flow-step-assignee .flow-step-label { color:var(--green); }
+  .flow-step-closed { background:rgba(100,116,139,.1);border-color:rgba(100,116,139,.3); }
+  .flow-step-closed .flow-step-num,.flow-step-closed .flow-step-label { color:var(--muted); }
+
+  /* DECISION BRANCH */
+  .flow-decision-row {
+    display:flex;justify-content:center;gap:20px;
+    margin:12px 0;flex-wrap:wrap;
+  }
+  .flow-decision-box {
+    padding:8px 16px;border-radius:6px;
+    font-size:11px;font-weight:600;text-align:center;
+  }
+
+  /* LEGEND */
+  .flow-legend {
+    display:flex;gap:16px;flex-wrap:wrap;
+    margin-top:16px;padding-top:12px;
+    border-top:1px solid var(--border);
+  }
+  .flow-legend-item {
+    display:flex;align-items:center;gap:6px;
+    font-size:10px;color:var(--muted);
+  }
+  .flow-legend-dot { width:10px;height:10px;border-radius:50%; }
+
+  /* DETAIL CARDS */
+  .flow-cards-grid {
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+  }
+  .flow-card {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:18px;
+    border-top:3px solid var(--border);
+  }
+  .flow-card-step {
+    font-size:10px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .flow-card-title {
+    font-family:'Rajdhani',sans-serif;
+    font-size:16px;font-weight:700;
+    letter-spacing:1px;margin-bottom:10px;
+    color:var(--text);
+  }
+  .flow-card-role {
+    display:inline-flex;align-items:center;
+    border-radius:20px;padding:2px 10px;
+    font-size:10px;font-weight:600;
+    letter-spacing:1px;text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .flow-card-desc { font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px; }
+  .flow-card-bullets { list-style:none;padding:0; }
+  .flow-card-bullets li {
+    font-size:11px;color:var(--text);
+    padding:4px 0;border-bottom:1px solid rgba(30,45,69,.4);
+    display:flex;align-items:flex-start;gap:8px;line-height:1.4;
+  }
+  .flow-card-bullets li:last-child { border-bottom:none; }
+  .flow-card-bullets li::before { content:'→';color:var(--accent);flex-shrink:0; }
+  .flow-card-time {
+    display:flex;align-items:center;gap:6px;
+    font-size:10px;color:var(--muted);
+    margin-top:10px;padding-top:8px;
+    border-top:1px solid var(--border);
+  }
+
 </style>
 </head>
 <body>
@@ -244,10 +621,15 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;text-align:left">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Access Levels</div>
       <div style="font-size:11px;color:var(--text);margin-bottom:4px">⚙️ <strong>Admin</strong> — Full access, raise &amp; close NCRs</div>
+      <div style="font-size:11px;color:var(--text);margin-bottom:4px">📋 <strong>Originator</strong> — Review &amp; approve assignee actions</div>
       <div style="font-size:11px;color:var(--text);margin-bottom:4px">✏️ <strong>Assignee</strong> — Complete your assigned NCR actions</div>
       <div style="font-size:11px;color:var(--muted)">👁 <strong>View Only</strong> — Read-only dashboard access</div>
     </div>
     <div class="vo-link" onclick="enterViewOnly()">Continue as View Only →</div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+      <button onclick="openPublicForm()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text);cursor:pointer;transition:all .2s;margin-bottom:8px;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">📋 Raise a Non-Conformance</button>
+      <button onclick="openFlowGuide()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">📖 How the NCR Process Works</button>
+    </div>
   </div>
 </div>
 
@@ -257,6 +639,238 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
 <div id="modal-overlay">
   <div class="modal-box" id="modal-box"></div>
 </div>
+
+
+<!-- ══ PRINT FRAME ══ -->
+<div id="print-ncr-frame"></div>
+
+<!-- ══ NCR FLOW GUIDE ══ -->
+<div id="flow-overlay">
+  <div class="flow-container">
+    <div class="flow-header">
+      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAB7AJsDASIAAhEBAxEB/8QAHQAAAgICAwEAAAAAAAAAAAAAAAgGBwUJAQMEAv/EAEcQAAEDBAAEAwUEBgYHCQAAAAECAwQABQYRBxIhMQhBURMyYXGBFCKRoRUWI0JDUhckYrHB0TM4RlOCkuFkcnWTlaKy0vD/xAAbAQACAgMBAAAAAAAAAAAAAAADBAAFAQIGB//EADARAAEEAQEGAwgCAwAAAAAAAAEAAgMRBCEFBhIxQVETImFxgaGxwdHh8CORJDJS/9oADAMBAAIRAxEAPwBy6KKKiiKKKKiiKpHNfEdi1oeeh2KBLvMppSkFZHsWQoHR6nqevoKu6kC4q2z9DcSchtyU8qGp7hR8UqPMD+dK5cr42gtXR7ubOxs6Z7ZxdCwLr2qU5fx14hX9SkMXJFljE9G4CeVWvis7V+GqtTw/8bRdixi+ZSgm4nSIk9w6Ej0Qs+S/j5/PurlH5VXMyJGu4rtdtk7Dw54PBDA3sQNQfr71sjopFI3F/iPEYistZZLDUUJDaVJQeYJ7BRI2r06mmEwLP8e4y4u7jlymO2fIEo2UxZBbXzD+KyoHqPVJ/MdasospkhrkuE2ju7l4MfimnDrV6e1XPUN4s8RLFw6x1VzuzockubTEhoP7R9foPRI81eVLLnjPFXhlkjUObl17ct7zn9VmiYstPDfYgkgK9Un6VAuJYv8Altx/S0y6PT5fIG/26+yR2CfIU82O+q5p01aVqsXnHE7LMmy5WTPXiXEnoOo32V5TaYyN+4jR6D19fOpzgfigz7H+SPf0Rckhp6EvD2UgD4LSNE/94GqOnRJ0FfLLjuNde6h0/GvG6oqHwo5a0ikuHOBu1sm4McULHxRsMi52eLMiLirS3JYkJG0KI2NKB0oa86ndUL4GbWYXBf7etHKufPdWD6oTpKT+Rq+qVcADQTrCS0EoooorVbIoooqKIrhakoQVrUEpSNkk6AFc0uHig4rlAfwXHJOln7t0ktq90f7lJ9f5vw9aHLKI28RT2z8CXPnEUfvPYd1L5PiJwKNf5NtdTcVR2HC2ma0yFtOEdyADza35661Mcd4m4Ff+VNtyi3KcP8N132S/lpejukLHQaFcEA9wDVc3OeOYXcS7o4jm0xxB/v8Af7Tn8W+NmPYUldvt/JeL1rpHaX+za32Lix2+Q6/KlIzHIrllmSyr9dfZGZLUOYMt8qRoaAA+X1NduEYpfMyvrdnsMQvvq+844ro2yn+ZavIfmabnhRwZxrCWmpklpF2vQAKpbyNpbPo2k9E/PvWf5co9gtLwN3maeaQj3/gfuqXbA+COc5UhuSuGmzQF9Q/OBSpQ9Ut+8froVdGMeGzD4KUrvk+4Xh4dSkL9i18tJ6/nV30U2zEjbzFrm8veXOyD5XcA7D781ELTwx4f2oJ+xYjakqHZTjAcV+KtmpBEstmiOJdiWmBHWj3VNRkJKfkQOle+ijhrRyCppMiaTV7ifaSvNcrfAucYxbjCjzGCQfZvthadjsdHzqE3/g5w8vHMpywphuq/iQnVMkfRJ5fyqf0VuCQgEA80tmaeGt9SVuY7eUzGQNiHPGifhzjofqBVBZpgascuC7de7HJgSSglClbSlXxT5EfKtiFYzJbBZsktblsvluYnRXB1Q6nej6g9wfiK3bIRzQnQg8koHArj8rh5Hh4Vk0BD+Pxk8rEuOnT0cKJUeZP8QbJ9D86cG2X2z3KyM3uFcor1ueQHESQ4AgpPqT2+tJz4geAN2xWc5kmNNO3iw/xWSf20Xpr7xHvI/tDqPP1qqM2dk/oe3xS64hn2qSWQshAVyp8t6rcsD9QtBI5mhT35Rxm4a44ZSJ2VQnn4qOd1iIS+4B8kbrJ8OOIWM59Cdk2CS4pTISpxh9HI6lKhtKinfY9evwNa8JPskv5Mnk/aeyGleg2Kz2N5xeOHWaWLJLOpS1Nw2m5MYn7slkj7zZ/vB8iBUMQrRQTm9VsdorC4Rk1qzDF4WQ2Z4uRJbYUAoaW2rzQoeSgehFZqgJnmiqO4/cFWslD+TYq0hm9655EYdETPiPRz4+fnV418SHm48dx95YQ02krWo9gANk1pJG2RtOTeFmzYcolhOvz9Ctcclh6NIcjSWXGX2lFDjbiSlSFDuCD2NZTDccueWZJEsNoa55MlWtn3W0j3lq9ABXq4lZIrLc5ut/UkIRJfPskga02n7qN/HQG/jTL+FHCG7Fh36zzGR+kbuOZsqHVuOD90D05veP09KqIYfEk4RyXpu09pnBwvGcKeaoep+ysLhphFnwTHGrRamgVkBUmSoftJDnmpR9PQeQqUUUVctAaKC8rllfM8vebJRRRRWUNFFFFRRFFFFRRFFFFRRcLSlaChaQpKhogjYIpOfGBwtVjyouTWGOo2eTMH2ltPaK4rQHyQojp6Hp6U49eK/WqDe7PKtNyYQ/ElNlt1ChsEH/Ed62a7hK0ewOFLWhNB+05Ho60hJ7d/vdvlUsxbhxkHEfKbVarIyUtNxmVTJaxpuMjXcnzPonuaxmf2KZjGX5rYJm+eKQEqI99BVtKvqkinE8Jt0tk3hZHgxIzLEyCUty+ROlOkpBStXrsdP+E0w91CwlWM4nUVOOGWD2Xh/izVgsiXS0Fl1511RUt51XvLO+2/QdBUnoopUm04BSpnKPEZhNqedj26Ncbu82opJabDbZI9FK/yqq878Q2RZFaJtngWaFbIkxpTLiy4p17kUNHR6AHXwNU1KPNKdV6rJ/OuuqZ+VI7S16pi7u4GPTuGyOpP6PgshjFrXesjtlnbGzMlNs6+BUN/luthsGM1ChMQ2EhLTDaW0AeQA0KRrgG0l3jHjIX2TL5x8wk6p66awG+Ulc9vjKTNHH0Av+z+EvnG/jPkFuzBWF4PHR9tbWlp6QWvarU6oAhttJ6eY2Tvr8qwYY8TykhXNKGxvXtYo/LdQPiFJu0PxDXOXYGS9dWrtzRGw3z8zmhocvn8qnZzrxHj/Zt//wBG/wCtD8TiceIn3J4YbceCIQMj1aCS/mSfogseJ3+aZ/5sX/OspGyPibw+xebmnEq6SXUtOJi260BTX9ZfXvSnFIHRAAJ0Ds6P18tmy7xH3O6x4AsqYntlhJfk2rkabHmpRJ7CrS4t8PZee8ME45OuTbt1YW3JbklrkbcfRvukdkkEj4b3TGOxrnXbveqXbGRJDF4ZZFbv+BZH2+aoS0Zh4js9D92x1K0wEOFCTESy01vQPKkuHatb77NZKEx4qvtrRfTMDBWOYGRFJA+hrC4g7x84Zw3sYs2LzzCS8p1IMH7W2Cfe5FpPY+hrKr4neJdM3lZwt91hABUpdjcQVbOiB1+tWRHalyAPcldF04v8Y+GeWxIeaW8Tbe+AstyUthTiN6UW3EdNj6jferk4s8X7fimF2q72pKJMq9Ne1ghwfdSjlBK1Ad9bHT1+VVraePN2g3+PauKWGMNtbAcfMbldjb8y2re0/LR+ddXjPVCcexL7Kpv2Dkd1TPs9BJR90jWvLRrHDZFhZ4qaSCvCxd/Ehl9vbvmPO3KPCfSpTJDUZtLo/dUErIIB9a4tcTxWtK9tPcuT2jpLKHoYCviTvtWHxTOvEnGstviWXGnnbOzGaRDcFn5wtoJASebfXp51I7hnfiYRbg5Gxl8v8wBT+ht9NDfTfzrNH0WAR3KythtviUu9+gxLjOdsNv8Abbly1vx3SGwOyUp2ST2FMdDZVHitMKecfUhASXHDtSyPM/Gqp4DZDxRvd1vKOINpcgRmW2zCKoXsOZR3zdd9fKrboTzqjMGlpSvG/j6Id4RkjLKU/pC3CM855qW2vaf/AGqNQPhNxbc4VX9T7lqcucK5QWG3mUPBtSVJ91Y2CD0Khr41dvjrQk8MYLh95MwgfVPWlFylSEy7YXDpCWGuY/DVHZ5m0UvIeF9hOti/iU4dXdSWppuVoe5eZQkxypCf+JG/7qn8XiNgcmOh9nLrMW1jaSqWhJ/AnYrX7bUs/apKWjorjkt76713FZSFBizIrcnaPvjz79On+FYMQWRO5XJkfhszGItxyz3O2XRvZKUrUWHD+O0/nVcZRw8zbGGHJN7xyZGjNe/ISAtodddVJJAp+qxOZWZrIsUulje0EzYq2QT+6oj7p+h0fpVU/CYR5V2uJvZlNcBMAR1NUfhp8EjHCm5ItHEvHLi6rTbU9vnPwUeX/Gn9rXHNiyrdcH4chKmJUV1Tawe6FpOvyIp7eDmVNZhw9td3StJkBoMykg9UOo6KH+P1oeC+raU7vfjlwjyG8uX1H1S2Sv8AW3T/AOPp/wDjThVFVcOsKVlAydVgjG8B/wC0fauZXN7T+bvqpVTUMRj4r6lc7tXaEeZ4XACOFoBv0RUL40PZhEwWROwmQGrnFWl5afYpdLjQ3zpCVA9eoPr0qaUUwNFUEWEsvCHxItNWt+BxHdefuLbqlImRGEcpQeyFITrSh6667qeJ8RfDRRATLuJG9E/ZegP41Lch4XcPb/OVOuuJWx+Uo7W6GuRSj6kp1s/OsZ/Qfwp9qXBhVuCieboV63rXbm1W9sKGA8dUtfiIzA8WcrskbC7RJd9k2WUOKZHtpClkfd0N8oHqfj2qW+JPCr3bMJwJ97UiJZICodweHUoWUJCT8iQR9PjTGYvheKYuSqwWCDb1lAQXGmhz8oGgOY9dfWs3KjsSo7kaUy2+y4nlW24kKSoehB6EVPEqqWPDJuzzS9cMvERg1swuz2K6sXaPcIMVqM6huOHEEpToKSoHRBA38Kkq/Elw1Ra03JTl3DClcqf6kdn6bqQSeB/CiQ8t5zCbcFrO1chWgH6BQFdf9BPCXkKP1Kg6J3/pHP8A7VLYsgSDsvBjviB4c3vJYmPszJ8WVKPK0uVG9m0Va2AVbIG/jVr1WyuBHCVSUJOFQdN+7+0cBH15qsOJHYgwmozIKGGEBCApRPKkDp1PXt61qa6LdvF1S1+O66tHHrbZEqHtUhUtQB/d2ED890rWSMOS5dujtNOOrcYaSEIGyegqe8fsy/XPPcvnMrKoUYNRYnoUNqIKvqdn8KYjwfYmmFij+WSmEl+5IaajKUnqlptOiR6bUT/yijg8DUsR4j9EtVh4ScVr2+y5bMQmNo6cj76gy3odjtZH91XBYvDZlqrSwq5TrPHlqBLrSXVqCSSfMJ1+FNfRQzKSiiFoRVZcb+LNtwCAYUQtzb++jbEbe0sg9lueg9B3NWYobSRsjY7jypF+OOI3rE89mou8h+cic4qRGnOHZfST2J/mT2I+VI5Uro2W1dJu/gQZuTwzHlrXdRC83KbeLrKutyfL8yU4XXnCAOZR7nQqyPDnxGGD5QqDc3Smx3NSUvk9mHOyXfl5H4dfKqsoqpY8sdxDmvScnEiyYDA8eUivZ2r2LZC2tDjaXG1pWhQCkqSdgg9iDX1SncAeNa8ZQzjOWOuO2cHljS+qlxP7KvMo/MfKmrgy406G1MhyGpEd5IW262oKSsHzBHerqKZsosLyraWy5tny8Eg06Hof3su6iiiiqtRRRRUURRRRUURRRRUURVCeLPi0MQsjeLWN0LvNwKUyVIPWMwe/yUodB6DZ9KyHHTjdFxdmTYcRXGuGQJHK8+tY+zW/fm4eyl+iB9aS6+fb5FzTd51//ScyXK53ZilFX397O/8ApRo471KBLLWgXzcXwhq+Rg1v2ikr9oPLqelON4cOLtjuFqs+C3UMWy6swmkQv3WpaQnsn0X8PPy9KTMMTLtNmRYGyXPeQeg7+8T5CpIuzNXm7Wm0wnpcq7kNx47UI6JdHYhXcaPXflRXNDggMeWnRbIKKweA2+8WrDbXbr/clXK5sR0okyVd1q+J89dt+et1nKUTwRUT4rYPbs9xN+zzOVuQn9pDka2WHQOh+R7EeYqWUVhzQ4UUSGZ8LxIw0RySg2Xw4Z7MfKbhItVtaBI51PF0keoSkf3mrEx7wy41GCV3y+XG4r11QwEsI3+ZP4ir6opduJE3paup95NoTaB/D7BX5+KTHi/wWv8Ahbr1xtiHbtYtlQebTt1gejiR5f2h09dVHuGvE7KsDfAtMsP29StuQZBKmVepHmk/EfnT3K0UkK1y6677Vr0zWW1PzK9TWGm2WnpzykIbSEpSOYjoB2HSlMiIQEOYaXT7D2g7a0T4MpgcGga9/d39QmxwLj7hWQobYuryrBPOgW5Z/ZKP9lwdPx1VrRJMeWwl+JIakMq91xpYUk/IjpWuGslYr/fbC77Wy3mfblf9nfUgH6A6rLM5w/2FoOXujC88WO/h9DqPv81sRopNsM4/Z3Z7lHVeZqb3b0q08y62hLik+qVgDqPjTIPZDOzjBBeeGl9hszPeSmSwFjmA6tLBO0K+P+FOwzsl0C5XaWxsnZ1GQW09RyU5rhxaG0KW4pKEJG1KUdACktyvjDxXh3OVaLxkb9lmx1crjTUBltaf+YHp6HzqBZLlGSX+M5+lc3vVxUpB5Gn3UlsnyHL21TYiKpDOOydXMOLeCYygpkXpqbJPux4JDyz8+XoPqaU3jT4lM0yS4SLDYkfq5ag57NZZc3JeTv8Aec/dBHkn8TUBxn2zbEaPNPI8lxQUltSdJSevTXQVHM2jAX1mQ0SpEhKSFeujr/KiNjAQXSucp9j/AA+y/iLLRa8YhFTRkuKlS3NpYZO+qlr8z8Bsmr0c8J0aPirEK25e6m6NpKlvSIiVNFwj7xSAQUj07mrl4DzYtw4TWCVEYZYSY/ItDSAkc6VFJJA8zrZ+dTehukN6IzIm1qkwvPh24i41jzkeyNwr286rmkOx3w2tQ9Aleunw3Vt+F7gyvBoSsnydhCsmmIKUtkhQhNH9wEdOc/vEfL13elFamQkUtmxNBtFFFFaIiKKKKiiKKKKii8l5bkPWia1D5ftK47iWeY6HOUkJ2fnqkJy/CcvxV9f6xWOXFBUdvhPOyo76kLTsVsBr4eaaeaU082hxtY0pC0ggj0INLz44mrVXWx9sv2aXU0ODqvvp6/ha3wQRsHdWLwV4WXPiFdA+57SJYo69SZeuqz/u2/VXqew/KrZ8RGA4db02y4W+wxociXPbafMcqbStKlAEcqSEj5gbq+bJbIFntUe2WuI1Ehx0BDTTY0lI/wD3nSkWJ5yHHkul2hvN/iNfjtIc++fSufz0UJkcFeGT8dtleKxk8iQkLbccQo6HclKhs/GvbhXDDFcNuq7jjrU6EtxPK62Ja1NuDy5kqJB15GprRVgImA2AuLdtDKe0sdI4g9CTSjWVYBhWVT2Z+R4xa7rKZTyNuyY4WoJ9OvcfOqJ8Qfh/jBh3KeHtpjNutIKpdpaZHK6Na52h5K/s+fl17s3RRQ4hJOYHBauMbS3FuK2G1OBxtwqdQ4jkKD21r1FSu2cOs0zSDEbxzHp01caWpsvFPs2ggnuVq0NdB+NPV/Rhw/Vl0nJ14la13eRpTshbXNzK/m5T93fTvrdTBtCG0JQ2hKEJGglI0AKIZuyCIO5VfeHrEb9hPDlux5E9GcmCW88lLCypLaFnYTvQ2R17dKsOiihE2bRwKFIooorCyiiiioov/9k=" style="width:48px;height:48px;object-fit:contain">
+      <div>
+        <div class="flow-header-title">NCR Process Flow Guide</div>
+        <div class="flow-header-sub">FSE | Field Services &amp; Engineering &nbsp;&middot;&nbsp; Non-Conformance &amp; Corrective Action System</div>
+      </div>
+      <button class="flow-back-btn" onclick="closeFlowGuide()">← Back to Login</button>
+    </div>
+    <div class="flow-diagram">
+      <div class="flow-diagram-title">Process Overview</div>
+      <div class="flow-steps-row">
+        <div class="flow-step-box flow-step-originator"><div class="flow-step-num">STEP 1</div><div class="flow-step-icon">📋</div><div class="flow-step-label">Raise NCR</div><div class="flow-step-role">Anyone</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step-box flow-step-originator"><div class="flow-step-num">STEP 2</div><div class="flow-step-icon">💬</div><div class="flow-step-label">Notify Responsible</div><div class="flow-step-role">Originator</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step-box flow-step-admin"><div class="flow-step-num">STEP 3</div><div class="flow-step-icon">⚙️</div><div class="flow-step-label">Admin Reviews</div><div class="flow-step-role">Admin Only</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step-box flow-step-assignee"><div class="flow-step-num">STEP 4</div><div class="flow-step-icon">✏️</div><div class="flow-step-label">Complete Actions</div><div class="flow-step-role">Assignee</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step-box flow-step-originator"><div class="flow-step-num">STEP 5</div><div class="flow-step-icon">📋</div><div class="flow-step-label">Originator Reviews</div><div class="flow-step-role">Originator</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step-box flow-step-admin"><div class="flow-step-num">STEP 6</div><div class="flow-step-icon">✅</div><div class="flow-step-label">Admin Closes</div><div class="flow-step-role">Admin Only</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step-box flow-step-closed"><div class="flow-step-num">STEP 7</div><div class="flow-step-icon">🔒</div><div class="flow-step-label">NCR Closed</div><div class="flow-step-role">System</div></div>
+      </div>
+      <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)">↑ If <strong style="color:var(--red)">Rejected</strong> at Step 5 — returns to Assignee for rework &nbsp;&middot;&nbsp; If <strong style="color:var(--red)">Overdue</strong> — 🔴 red alert fires immediately on Admin dashboard</div>
+      <div class="flow-legend">
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:#60a5fa"></div>Originator (Anyone)</div>
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:#c084fc"></div>Admin (Quality Manager)</div>
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:var(--green)"></div>Assignee (Responsible Person)</div>
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:var(--muted)"></div>System (Automatic)</div>
+      </div>
+    </div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;">Step-by-Step Detail</div>
+    <div class="flow-cards-grid">
+      <div class="flow-card" style="border-top-color:#3b82f6">
+        <div class="flow-card-step" style="color:#60a5fa">Step 1</div>
+        <div class="flow-card-title">Raise a Non-Conformance</div>
+        <div class="flow-card-role" style="background:rgba(59,130,246,.12);color:#60a5fa">👤 Anyone — No password needed</div>
+        <div class="flow-card-desc">Anyone who identifies a non-conformance can raise an NCR directly from the login screen.</div>
+        <ul class="flow-card-bullets">
+          <li>Click <strong>"Raise a Non-Conformance"</strong> on the login screen</li>
+          <li>Fill in your name, date, issue type and department</li>
+          <li>Select priority — Critical, Major or Minor</li>
+          <li>Set a suggested due date and responsible person</li>
+          <li>Describe the non-conformance in detail</li>
+          <li>Submit — you receive a reference number</li>
+        </ul>
+        <div class="flow-card-time">⏱ Takes about 3–5 minutes</div>
+      </div>
+      <div class="flow-card" style="border-top-color:#3b82f6">
+        <div class="flow-card-step" style="color:#60a5fa">Step 2</div>
+        <div class="flow-card-title">Notify the Responsible Person</div>
+        <div class="flow-card-role" style="background:rgba(59,130,246,.12);color:#60a5fa">👤 Originator</div>
+        <div class="flow-card-desc">After submitting, notify the person who needs to action it and also inform the Quality Manager.</div>
+        <ul class="flow-card-bullets">
+          <li>Use the <strong>💬 WhatsApp button</strong> — message pre-filled automatically</li>
+          <li>Or use the <strong>📧 Email button</strong> — email pre-filled automatically</li>
+          <li>Share the reference number e.g. PND-847291</li>
+          <li>Also notify the Quality Manager (Admin) to review</li>
+        </ul>
+        <div class="flow-card-time">⏱ Immediately after submitting</div>
+      </div>
+      <div class="flow-card" style="border-top-color:#a855f7">
+        <div class="flow-card-step" style="color:#c084fc">Step 3</div>
+        <div class="flow-card-title">Admin Reviews &amp; Approves</div>
+        <div class="flow-card-role" style="background:rgba(168,85,247,.12);color:#c084fc">⚙️ Admin Only</div>
+        <div class="flow-card-desc">The Quality Manager reviews every submission before it becomes an official NCR.</div>
+        <ul class="flow-card-bullets">
+          <li>Admin logs in — alert popup shows pending items immediately</li>
+          <li>Reviews submission in <strong>⏳ Pending Review</strong> tab</li>
+          <li>Can adjust priority, due date and assignee</li>
+          <li>Click <strong>✅ Accept</strong> → becomes official NCR with number</li>
+          <li>Click <strong>❌ Decline</strong> → removed (duplicate / not valid)</li>
+          <li>Sends WhatsApp or Email to assignee with full NCR details</li>
+        </ul>
+        <div class="flow-card-time">⏱ Within 24 hours of submission</div>
+      </div>
+      <div class="flow-card" style="border-top-color:var(--green)">
+        <div class="flow-card-step" style="color:var(--green)">Step 4</div>
+        <div class="flow-card-title">Assignee Completes Actions</div>
+        <div class="flow-card-role" style="background:rgba(16,185,129,.12);color:var(--green)">✏️ Assignee — Password: FSE.Assign01</div>
+        <div class="flow-card-desc">The responsible person logs in and completes the root cause analysis and corrective actions.</div>
+        <ul class="flow-card-bullets">
+          <li>Open the link sent by Admin</li>
+          <li>Login with password: <strong>FSE.Assign01</strong></li>
+          <li>Find your NCR → click <strong>Complete Actions</strong></li>
+          <li>Fill in Root Cause — 5 Why analysis</li>
+          <li>Fill in Corrective Action taken</li>
+          <li>Fill in Preventive Action to avoid recurrence</li>
+          <li>Tick the declaration, type your name → <strong>Submit &amp; Sign Off</strong></li>
+        </ul>
+        <div class="flow-card-time">⏱ Must be done before due date</div>
+      </div>
+      <div class="flow-card" style="border-top-color:#a855f7">
+        <div class="flow-card-step" style="color:#c084fc">Step 5</div>
+        <div class="flow-card-title">Admin Approves or Rejects</div>
+        <div class="flow-card-role" style="background:rgba(168,85,247,.12);color:#c084fc">⚙️ Admin Only</div>
+        <div class="flow-card-desc">Admin reviews the completed actions and either closes or rejects the NCR.</div>
+        <ul class="flow-card-bullets">
+          <li>Admin sees <strong>"Awaiting Approval"</strong> alert on login</li>
+          <li>Opens the NCR and reviews all completed actions</li>
+          <li>Click <strong>✅ Approve &amp; Close</strong> — NCR is officially closed</li>
+          <li>Click <strong>❌ Reject</strong> — provide reason, returns to assignee for rework</li>
+        </ul>
+        <div class="flow-card-time">⏱ Within 48 hours of assignee submission</div>
+      </div>
+      <div class="flow-card" style="border-top-color:var(--muted)">
+        <div class="flow-card-step" style="color:var(--muted)">Step 6</div>
+        <div class="flow-card-title">NCR Closed &amp; Recorded</div>
+        <div class="flow-card-role" style="background:rgba(100,116,139,.12);color:var(--muted)">🔒 System — Automatic</div>
+        <div class="flow-card-desc">Once approved the NCR is permanently recorded in the system for audit purposes.</div>
+        <ul class="flow-card-bullets">
+          <li>Status changes to <strong>✔ Closed</strong> with date and sign-off</li>
+          <li>Visible in NCR Register permanently</li>
+          <li>Repeat patterns tracked automatically</li>
+          <li>Charts and dashboards update instantly</li>
+          <li>Printable report available at any time</li>
+        </ul>
+        <div class="flow-card-time">⏱ Permanent record</div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:20px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">Quick Reference — Access &amp; Passwords</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+        <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px;"><div style="font-size:10px;color:var(--red);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">📋 Raise NCR</div><div style="font-size:12px;color:var(--text)">No password needed</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Click "Raise a Non-Conformance" on login screen</div></div>
+        <div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:12px;"><div style="font-size:10px;color:#60a5fa;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">📋 Originator Login</div><div style="font-size:13px;color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;">FSE.Origin01</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Review &amp; approve assignee actions</div></div>
+        <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px;"><div style="font-size:10px;color:var(--green);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">✏️ Assignee Login</div><div style="font-size:13px;color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;">FSE.Assign01</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Complete your assigned NCR actions</div></div>
+        <div style="background:rgba(232,160,32,.06);border:1px solid rgba(232,160,32,.2);border-radius:8px;padding:12px;"><div style="font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">⚙️ Admin Login</div><div style="font-size:13px;color:var(--accent);font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;">Admin only</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Full access — Quality Manager only</div></div>
+        <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px;"><div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">👁 View Only</div><div style="font-size:12px;color:var(--text)">No password needed</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Read-only access to dashboard</div></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;">FSE | Field Services &amp; Engineering &nbsp;&middot;&nbsp; NCR Management System</div>
+  </div>
+</div>
+
+<!-- ══ LOGIN ALERT POPUP ══ -->
+<div id="login-alert-popup">
+  <div class="login-alert-box">
+    <div class="login-alert-title">⚠ Items Require Your Attention</div>
+    <div class="login-alert-sub">The following items need your review as Admin</div>
+    <div class="alert-stat-grid" id="alert-popup-stats"></div>
+    <button class="dismiss-btn" onclick="dismissLoginAlert()">✅ Got It — Take Me to Dashboard</button>
+  </div>
+</div>
+
+<!-- ══ REJECT MODAL ══ -->
+<div id="reject-modal">
+  <div class="reject-box">
+    <div class="reject-title">❌ Reject NCR Action</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Provide your reason for rejection. The assignee will be notified to rework their actions.</p>
+    <label class="flabel">Rejection Reason</label>
+    <textarea class="ftextarea" id="reject-reason" rows="4" placeholder="Explain what needs to be corrected or improved..."></textarea>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button class="reject-action-btn" style="background:var(--red);color:#fff;border-color:var(--red)" onclick="confirmReject()">❌ Confirm Rejection</button>
+      <button class="reject-action-btn" onclick="document.getElementById('reject-modal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PUBLIC NCR SUBMISSION FORM ══ -->
+<div id="public-submit-overlay" style="display:none">
+  <div class="public-form-box">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+      <img src="" id="public-logo" style="width:38px;height:38px;object-fit:contain;flex-shrink:0">
+      <div style="flex:1"><div class="public-form-title" style="font-size:15px;margin-bottom:0">Raise a Non-Conformance</div><div style="font-size:10px;color:var(--muted);letter-spacing:1px">FSE &nbsp;&middot;&nbsp; Admin reviews before it becomes official</div></div>
+      <button onclick="closePublicForm()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;flex-shrink:0">← Back</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+      <div><label class="flabel" style="font-size:9px">Your Name *</label><input type="text" class="finput" id="pub-name" placeholder="Full name" style="padding:7px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">Email / Phone</label><input type="text" class="finput" id="pub-contact" placeholder="Contact" style="padding:7px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">Date Identified *</label><input type="date" class="finput" id="pub-date" style="padding:7px 10px;font-size:12px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div><label class="flabel" style="font-size:9px">Issue Type *</label>
+        <select class="fselect" id="pub-issue" style="padding:7px 10px;font-size:12px">
+          <option value="">Select...</option>
+          <option>Quality Issue</option><option>Safety &amp; Health</option>
+          <option>Environmental Issue</option><option>Near Miss</option>
+          <option>Incident / Injury</option><option>Supplier Issue</option>
+          <option>Internal Audit Query</option><option>Training Issue</option>
+          <option>Improvement Suggestion</option><option>Other</option>
+        </select>
+      </div>
+      <div><label class="flabel" style="font-size:9px">Department / Area *</label><input type="text" class="finput" id="pub-dept" placeholder="e.g. Fabrication, Quality" style="padding:7px 10px;font-size:12px"></div>
+    </div>
+    <label class="flabel" style="font-size:9px">Suggested Priority *</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+      <button type="button" class="priority-btn" id="pub-pri-crit" onclick="selectPubPriority('CRITICAL',this)" style="padding:7px 6px;font-size:11px">🔴 CRITICAL<br><small style="font-size:9px;font-weight:400">24–72 hrs</small></button>
+      <button type="button" class="priority-btn" id="pub-pri-major" onclick="selectPubPriority('MAJOR',this)" style="padding:7px 6px;font-size:11px">🟠 MAJOR<br><small style="font-size:9px;font-weight:400">7 Days</small></button>
+      <button type="button" class="priority-btn" id="pub-pri-minor" onclick="selectPubPriority('MINOR',this)" style="padding:7px 6px;font-size:11px">🟡 MINOR<br><small style="font-size:9px;font-weight:400">14+ Days</small></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+      <div><label class="flabel" style="font-size:9px">Due Date *</label><input type="date" class="finput" id="pub-due" style="padding:7px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">Assignee Name</label><input type="text" class="finput" id="pub-assignee" placeholder="Name" style="padding:7px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">WhatsApp No.</label><input type="text" class="finput" id="pub-assignee-cell" placeholder="082..." style="padding:7px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">Email</label><input type="email" class="finput" id="pub-assignee-email" placeholder="name@..." style="padding:7px 10px;font-size:12px"></div>
+    </div>
+    <div style="margin-bottom:8px">
+      <label class="flabel" style="font-size:9px">Description of Non-Conformance *</label>
+      <textarea class="ftextarea" id="pub-desc" rows="3" placeholder="Describe what happened, where, what was affected..." style="font-size:12px;padding:7px 10px"></textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="flabel" style="font-size:9px">Immediate Action Taken (if any)</label>
+      <textarea class="ftextarea" id="pub-immediate" rows="2" placeholder="What did you do right away?" style="font-size:12px;padding:7px 10px"></textarea>
+    </div>
+    <button class="public-submit-btn" onclick="submitPublicNCR()" style="padding:10px">📋 Submit Non-Conformance</button>
+    <div id="pub-error" style="display:none;margin-top:8px;font-size:12px;color:var(--red)">⚠ Please fill in all required fields marked with *</div>
+    <div class="public-success-msg" id="pub-success">
+      <div class="check">✅</div>
+      <p><strong>Submitted successfully!</strong><br>Logged and will be reviewed by the Quality Manager.<br>Reference: <span id="pub-ref"></span></p>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button onclick="sendPubWhatsApp()" style="padding:8px 14px;background:#25d366;color:#fff;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;cursor:pointer;">💬 WhatsApp</button>
+        <button onclick="sendPubEmail()" style="padding:8px 14px;background:#0078d4;color:#fff;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;cursor:pointer;">📧 Email</button>
+        <button onclick="resetPublicForm()" style="padding:8px 14px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;cursor:pointer;">Submit Another</button>
+        <button onclick="closePublicForm()" style="padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--text);cursor:pointer;">← Back</button>
+      </div>
+    </div>
+  </div></div>
+
+<!-- ══ INDIVIDUAL NCR PRINT FRAME ══ -->
+<div id="print-ncr-frame-real"></div>
+
 
 <!-- HEADER -->
 <header>
@@ -280,6 +894,7 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
   <button class="tab active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
   <button class="tab" onclick="showTab('register',this)">📋 NCR Register</button>
   <button class="tab" onclick="showTab('new',this)">➕ Raise NCR</button>
+  <button class="tab" onclick="showTab('pending',this)" id="pending-tab">⏳ Pending Review <span id="pending-count-badge" style="display:none;background:#eab308;color:#000;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;font-weight:700">0</span></button>
   <button class="tab" onclick="showTab('charts',this)">📈 Charts</button>
 </div>
 
@@ -349,8 +964,12 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
         <button class="fbtn active" onclick="filterReg('all',this)">All</button>
         <button class="fbtn f-open" onclick="filterReg('Open',this)">Open</button>
         <button class="fbtn" onclick="filterReg('In Progress',this)">In Progress</button>
+        <button class="fbtn" style="color:#60a5fa;border-color:rgba(96,165,250,.3)" onclick="filterReg('Awaiting Originator',this)">Awaiting Originator</button>
+        <button class="fbtn" style="color:#a855f7;border-color:rgba(168,85,247,.3)" onclick="filterReg('Awaiting Admin',this)">Awaiting Admin</button>
+        <button class="fbtn f-crit" onclick="filterReg('Rejected',this)">Rejected</button>
         <button class="fbtn f-closed" onclick="filterReg('Closed',this)">Closed</button>
         <button class="fbtn f-crit" onclick="filterReg('CRITICAL',this)">Critical</button>
+        <button class="fbtn" style="color:var(--red);border-color:rgba(239,68,68,.3)" onclick="filterReg('Overdue',this)">🔴 Overdue</button>
       </div>
     </div>
     <div style="overflow-x:auto">
@@ -476,7 +1095,15 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
         </div>
         <div>
           <label class="flabel">Assigned To</label>
-          <input type="text" class="finput" id="f-assigned" placeholder="Name / email">
+          <input type="text" class="finput" id="f-assigned" placeholder="Full name">
+        </div>
+        <div>
+          <label class="flabel">Assignee Cell No. <span style="color:var(--muted);font-size:9px">— For WhatsApp</span></label>
+          <input type="text" class="finput" id="f-cell" placeholder="e.g. 0821234567">
+        </div>
+        <div>
+          <label class="flabel">Assignee Email <span style="color:var(--muted);font-size:9px">— For Email</span></label>
+          <input type="email" class="finput" id="f-email" placeholder="e.g. name@fse.net.za">
         </div>
         <div>
           <label class="flabel">Due Date</label>
@@ -513,6 +1140,22 @@ main{padding:20px 24px 40px;max-width:1400px;margin:0 auto;}
       <button class="submit-btn" onclick="submitNCR()">✅ Register NCR</button>
       <span id="form-msg" style="margin-left:16px;font-size:12px;color:var(--green);display:none;">✔ NCR Registered Successfully!</span>
     </div>
+  </div>
+</div>
+
+<!-- ═══ PENDING REVIEW ═══ -->
+<div id="view-pending" class="view">
+  <div id="pending-admin-only" style="display:none">
+    <div style="background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:#eab308;">
+      ⏳ <strong>Pending Review Queue</strong> — These have been submitted by staff but are NOT yet official NCRs. Review each one and either Accept (assigns an NCR number and makes it official) or Decline.
+    </div>
+    <div id="pending-cards-container"></div>
+    <div id="no-pending" style="display:none;text-align:center;padding:40px;color:var(--muted);font-size:13px;">✅ No pending submissions — all clear!</div>
+  </div>
+  <div id="pending-no-access" style="display:none;text-align:center;padding:60px 20px;color:var(--muted);">
+    <div style="font-size:32px;margin-bottom:12px">🔒</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;letter-spacing:2px;text-transform:uppercase;">Admin Access Required</div>
+    <div style="font-size:12px;margin-top:8px">Only the admin can review and approve pending NCR submissions.</div>
   </div>
 </div>
 
@@ -563,8 +1206,10 @@ document.getElementById('header-logo').src = FSE_LOGO;
 // ═══════════════════════════════════════════════
 const ADMIN_HASH = "127560cfcf6098b9999de57dcbea7a75c82cdd302372ecff77069b31ed8bcf40";
 const ASSIGNEE_HASH = "0a3c83e6955c09b5d7b4cfc91d7f77ba8dcfbf9e0cbcbd5abd2588c2c06c1849";
+const ORIGINATOR_HASH = "f13bb2819ce695deec5da3f60e3fdec384aa13ef988f7e2424b5a6e18e3422c2";
 let isAdmin = false;
 let isAssignee = false;
+let isOriginator = false;
 
 async function sha256(msg) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
@@ -580,8 +1225,10 @@ async function tryLogin() {
     document.getElementById("admin-badge").innerHTML = "⚙ Admin";
     updateRaiseForm();
     renderRegister();
+    renderSummary();
+    setTimeout(showLoginAlert, 400);
   } else if (h === ASSIGNEE_HASH) {
-    isAdmin = false; isAssignee = true;
+    isAdmin = false; isAssignee = true; isOriginator = false;
     document.getElementById("login-overlay").style.display = "none";
     document.getElementById("admin-badge").style.display = "flex";
     document.getElementById("admin-badge").innerHTML = "✏️ Assignee";
@@ -589,8 +1236,17 @@ async function tryLogin() {
     document.getElementById("admin-badge").style.borderColor = "rgba(59,130,246,.35)";
     document.getElementById("admin-badge").style.color = "var(--blue)";
     updateRaiseForm();
-    // Switch to assignee view automatically
     showAssigneeView();
+  } else if (h === ORIGINATOR_HASH) {
+    isAdmin = false; isAssignee = false; isOriginator = false; isOriginator = true;
+    document.getElementById("login-overlay").style.display = "none";
+    document.getElementById("admin-badge").style.display = "flex";
+    document.getElementById("admin-badge").innerHTML = "📋 Originator";
+    document.getElementById("admin-badge").style.background = "rgba(59,130,246,.12)";
+    document.getElementById("admin-badge").style.borderColor = "rgba(59,130,246,.35)";
+    document.getElementById("admin-badge").style.color = "#60a5fa";
+    updateRaiseForm();
+    showOriginatorView();
   } else {
     const e = document.getElementById("login-err");
     e.style.display = "block";
@@ -599,14 +1255,14 @@ async function tryLogin() {
   }
 }
 function enterViewOnly() {
-  isAdmin = false; isAssignee = false;
+  isAdmin = false; isAssignee = false; isOriginator = false;
   document.getElementById("login-overlay").style.display = "none";
   updateRaiseForm();
 }
 function logoutAdmin() {
   const role = isAdmin ? "Admin" : "Assignee";
   if (confirm(`Log out of ${role} mode?`)) {
-    isAdmin = false; isAssignee = false;
+    isAdmin = false; isAssignee = false; isOriginator = false;
     document.getElementById("admin-badge").style.display = "none";
     document.getElementById("admin-badge").innerHTML = "⚙ Admin";
     document.getElementById("admin-badge").style.background = "";
@@ -626,13 +1282,54 @@ function updateRaiseForm() {
   document.getElementById("raise-form").style.display = isAdmin ? "block" : "none";
 }
 
+function showLoginAlert() {
+  const s = computeStats();
+  const pending = PendingNCRs.length;
+  const total = s.awaiting + s.overdue + s.rejected + pending;
+  if (total === 0) return;
+
+  const stats = [
+    { num: pending, label: "Pending Review", color: "#eab308", bg: "rgba(234,179,8,.1)" },
+    { num: s.awaiting, label: "Awaiting Approval", color: "#a855f7", bg: "rgba(168,85,247,.1)" },
+    { num: s.overdue, label: "Overdue", color: "var(--red)", bg: "rgba(239,68,68,.1)" },
+    { num: s.rejected, label: "Rejected — Rework", color: "var(--amber)", bg: "rgba(245,158,11,.1)" },
+  ].filter(s => s.num > 0);
+
+  const grid = document.getElementById("alert-popup-stats");
+  grid.innerHTML = stats.map(s => `
+    <div class="alert-stat-card" style="background:${s.bg}">
+      <div class="alert-stat-num" style="color:${s.color}">${s.num}</div>
+      <div class="alert-stat-lbl" style="color:${s.color}">${s.label}</div>
+    </div>
+  `).join('');
+
+  document.getElementById("login-alert-popup").classList.add("open");
+}
+
+function dismissLoginAlert() {
+  document.getElementById("login-alert-popup").classList.remove("open");
+  // Navigate to pending tab if there are pending items
+  if (PendingNCRs.length > 0) {
+    const pendingTab = document.querySelector('[onclick*="pending"]');
+    if (pendingTab) { pendingTab.click(); }
+  }
+}
+
 function showAssigneeView() {
-  // Switch to register tab filtered to open NCRs for assignee
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   document.getElementById("view-register").classList.add("active");
   document.querySelectorAll(".tab")[1].classList.add("active");
   regFilter = "all";
+  renderRegister();
+}
+
+function showOriginatorView() {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-register").classList.add("active");
+  document.querySelectorAll(".tab")[1].classList.add("active");
+  regFilter = "Awaiting Originator";
   renderRegister();
 }
 
@@ -663,6 +1360,9 @@ let NCRs = [
   { id:"NCR-122", date:"2026-03-23", raisedBy:"Bongani Sithole", priority:"CRITICAL", issueType:"Quality Issue", dept:"Quality", assignedTo:"Andrew (andrew@fse.net.za)", due:"2026-03-26", desc:"HF440 — Tutuka impeller hub bore. Hub bore built up was conducted inside the hub with weld stringers. The weld stringers were not cleaned between welds during welding — as a result multiple defects found including slag inclusion.", immediate:"Excavating the weld and repair.", rootCause:"Welder did not clean welds between passes.", corrective:"Weld after machining and clean welds properly.", preventive:"Welder to make use of grinder and air chipper to clean between each weld run.", status:"Closed", closedDate:"2026-04-17", repeatTag:"Poor Workmanship / Weld Quality", repeatFlag:false },
   { id:"NCR-123", date:"2026-03-23", raisedBy:"Bongani Sithole", priority:"CRITICAL", issueType:"Quality Issue", dept:"Quality", assignedTo:"Andrew (andrew@fse.net.za)", due:"2026-03-26", desc:"HF440 — Tutuka impeller secondary liners. Welding carried out on secondary liners without WPS, welders not qualified, incorrect consumable used. Work on hold until welders are qualified.", immediate:"Work on hold until welders are qualified.", rootCause:"Welders not checked for qualifications before commencing work. No WPS provided to welders on the floor.", corrective:"Correct WPS was given to the welder.", preventive:"Supervision must make sure at all times that the correct WPS is on the shop floor and that correct welders are used.", status:"Closed", closedDate:"2026-04-17", repeatTag:"Welding Checklist Not Completed", repeatFlag:false },
 ];
+// Pending submissions from public form
+let PendingNCRs = [];
+
 
 let selectedPriority = "";
 let selectedIssueType = "";
@@ -682,8 +1382,12 @@ function priorityBadge(p) {
   return `<span class="b-minor">🟡 MINOR</span>`;
 }
 function statusBadge(ncr) {
-  if (isOverdue(ncr)) return `<span class="b-overdue">⏰ Overdue</span>`;
+  if (isOverdue(ncr) && !["Closed","Awaiting Originator","Awaiting Admin"].includes(ncr.status)) return `<span class="b-overdue">🔴 Overdue</span>`;
   if (ncr.status === "Closed") return `<span class="b-closed">✔ Closed</span>`;
+  if (ncr.status === "Awaiting Originator") return `<span class="b-awaiting" style="color:#60a5fa;border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.1)">📋 Awaiting Originator</span>`;
+  if (ncr.status === "Awaiting Admin") return `<span class="b-awaiting">🟣 Awaiting Admin</span>`;
+  if (ncr.status === "Awaiting Approval") return `<span class="b-awaiting">🟣 Awaiting Approval</span>`;
+  if (ncr.status === "Rejected") return `<span class="b-rejected">❌ Rejected</span>`;
   if (ncr.status === "In Progress") return `<span class="b-inprog">⚙ In Progress</span>`;
   return `<span class="b-open">● Open</span>`;
 }
@@ -708,10 +1412,13 @@ function getMonths() {
 function computeStats() {
   return {
     total: NCRs.length,
-    open: NCRs.filter(n => n.status !== "Closed").length,
+    open: NCRs.filter(n => !["Closed"].includes(n.status)).length,
     closed: NCRs.filter(n => n.status === "Closed").length,
-    overdue: NCRs.filter(n => isOverdue(n)).length,
+    overdue: NCRs.filter(n => isOverdue(n) && n.status !== "Closed").length,
     crit: NCRs.filter(n => n.priority === "CRITICAL" && n.status !== "Closed").length,
+    awaiting: NCRs.filter(n => n.status === "Awaiting Admin").length,
+    awaitingOrig: NCRs.filter(n => n.status === "Awaiting Originator").length,
+    rejected: NCRs.filter(n => n.status === "Rejected").length,
   };
 }
 
@@ -725,6 +1432,24 @@ function renderSummary() {
   document.getElementById("s-closed").textContent = s.closed;
   document.getElementById("s-overdue").textContent = s.overdue;
   document.getElementById("s-crit").textContent = s.crit;
+  renderAlertBanner(s);
+}
+
+function renderAlertBanner(s) {
+  const banner = document.getElementById("admin-alert-banner");
+  if (!banner) return;
+  if (isAdmin && (s.awaiting > 0 || s.overdue > 0 || s.rejected > 0 || PendingNCRs.length > 0)) {
+    banner.style.display = "flex";
+    document.getElementById("alert-awaiting-count").textContent = s.awaiting;
+    // awaitingOrig shown in pending count if originator logged in
+    document.getElementById("alert-overdue-count").textContent = s.overdue;
+    document.getElementById("alert-rejected-count").textContent = s.rejected;
+    const pc = document.getElementById("alert-pending-count");
+    if (pc) pc.textContent = PendingNCRs.length;
+  } else {
+    banner.style.display = "none";
+  }
+  updatePendingBadge();
 }
 
 function renderDashCritical() {
@@ -754,13 +1479,14 @@ function renderRegister() {
   let data = NCRs;
   if (regFilter !== "all") {
     if (regFilter === "CRITICAL") data = data.filter(n => n.priority === "CRITICAL");
+    else if (regFilter === "Overdue") data = data.filter(n => isOverdue(n) && n.status !== "Closed");
     else data = data.filter(n => n.status === regFilter);
   }
   if (data.length === 0) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">No NCRs match this filter</td></tr>`;
     return;
   }
-  tbody.innerHTML = data.map((n,i) => `<tr class="${rowClass(n)}">
+  tbody.innerHTML = data.map((n,i) => `<tr class="${rowClass(n)}${isOverdue(n) && n.status !== 'Closed' ? ' overdue-row' : ''}">
     <td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--accent);white-space:nowrap">${n.id}</td>
     <td style="color:var(--muted);white-space:nowrap">${n.date}</td>
     <td>${n.desc.slice(0,50)}${n.desc.length>50?'…':''} ${n.repeatFlag?'<span style="font-size:10px;color:var(--red);font-weight:700">🔁 REPEAT</span>':''}</td>
@@ -844,9 +1570,62 @@ function openModal(idx) {
         ${fieldHTML('Preventive Action', n.preventive, 'preventive', 'textarea')}
       </div>
     </div>
-    ${(isAdmin || isAssignee) ? `<button class="modal-save-btn" style="${isAssignee ? 'background:var(--blue)' : ''}" onclick="closeModal();refreshAll()">✅ ${isAssignee ? 'Save My Actions' : 'Save & Close'}</button>` : ''}
-    <button class="modal-save-btn no-print" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);margin-left:8px" onclick="printSingleNCR(${idx})">🖨️ Print This NCR</button>
-    ${isAssignee ? `<p style="font-size:10px;color:var(--muted);margin-top:8px">✏️ You can update Root Cause, Corrective &amp; Preventive Actions only. Admin closes the NCR.</p>` : ''}
+    <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      ${isAdmin && n.status === 'Awaiting Admin' ? `
+        <button class="approve-btn" onclick="approveNCR(${idx})">✅ Final Approve &amp; Close</button>
+        <button class="reject-action-btn" onclick="openRejectModal(${idx})">❌ Reject</button>
+      ` : ''}
+      ${isAdmin && n.status !== 'Awaiting Admin' ? `
+        <button class="modal-save-btn" onclick="closeModal();refreshAll()">💾 Save &amp; Close</button>
+      ` : ''}
+      ${isOriginator && n.status === 'Awaiting Originator' ? `
+        <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.25);border-radius:8px;padding:12px;width:100%;margin-bottom:8px">
+          <div style="font-size:11px;color:#60a5fa;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">📋 Originator Review</div>
+          <div style="font-size:12px;color:var(--text);margin-bottom:10px">Please review the Root Cause, Corrective and Preventive Actions completed by the assignee. If satisfied, approve to send for final Admin close-out.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="approve-btn" onclick="originatorApproveNCR(${idx})">✅ Approve Actions — Send to Admin</button>
+            <button class="reject-action-btn" onclick="originatorRejectNCR(${idx})">❌ Reject — Request Rework</button>
+          </div>
+        </div>
+      ` : ''}
+      ${isOriginator && n.status !== 'Awaiting Originator' ? `
+        <div style="font-size:12px;color:var(--muted);padding:8px">
+          ${n.status === 'Awaiting Admin' ? '✅ You have approved this NCR — awaiting Admin final close-out.' :
+            n.status === 'Closed' ? '🔒 This NCR has been closed.' :
+            'This NCR is not yet ready for your review.'}
+        </div>
+      ` : ''}
+      ${isAssignee && (n.status === 'Open' || n.status === 'In Progress' || n.status === 'Rejected') ? `
+        <div class="signoff-box" style="width:100%">
+          <div class="signoff-title">✏️ Assignee Sign-Off</div>
+          ${n.status === 'Rejected' ? `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--red)">❌ Rejected by Admin: ${n.rejectionReason || 'No reason provided'}<br><span style="font-size:10px;color:var(--muted)">Please revise your actions below and re-submit.</span></div>` : ''}
+          <div class="signoff-check">
+            <input type="checkbox" id="signoff-check-${idx}" onchange="document.getElementById('signoff-btn-${idx}').disabled=!this.checked">
+            <span>I confirm that the Root Cause, Corrective and Preventive Actions entered above are accurate and complete to the best of my knowledge.</span>
+          </div>
+          <div style="margin-bottom:10px">
+            <label class="flabel">Your Full Name</label>
+            <input type="text" class="finput" id="signoff-name-${idx}" placeholder="Type your full name..." style="max-width:280px">
+          </div>
+          <button class="signoff-btn" id="signoff-btn-${idx}" disabled onclick="submitSignOff(${idx})">✅ Submit &amp; Sign Off</button>
+        </div>
+      ` : ''}
+      ${isAssignee && n.status === 'Awaiting Originator' ? `
+        <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.25);border-radius:8px;padding:12px;font-size:12px;color:#60a5fa;width:100%">
+          📋 Signed off by <strong>${n.assigneeSignOff || 'Assignee'}</strong> on ${n.assigneeSignOffDate || '—'} — Awaiting Originator review &amp; approval.
+        </div>
+      ` : ''}
+      ${isAssignee && n.status === 'Awaiting Admin' ? `
+        <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);border-radius:8px;padding:12px;font-size:12px;color:#a855f7;width:100%">
+          🟣 Originator approved on ${n.originatorApprovalDate || '—'} — Awaiting Admin final close-out.
+        </div>
+      ` : ''}
+      <button class="modal-save-btn no-print" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);margin-left:auto" onclick="printSingleNCR(${idx})">🖨️ Print This NCR</button>
+      ${isAdmin ? `
+        <button class="modal-save-btn no-print" style="background:#25d366;color:#fff;border:none" onclick="sendWhatsApp(${idx})">💬 WhatsApp</button>
+        <button class="modal-save-btn no-print" style="background:#0078d4;color:#fff;border:none" onclick="sendEmail(${idx})">📧 Email</button>
+      ` : ''}
+    </div>
   `;
   overlay.classList.add("open");
 }
@@ -926,6 +1705,8 @@ function submitNCR() {
     issueType: selectedIssueType,
     dept, 
     assignedTo: document.getElementById("f-assigned").value,
+    assigneeCell: document.getElementById("f-cell").value.trim().replace(/\s/g,''),
+    assigneeEmail: document.getElementById("f-email") ? document.getElementById("f-email").value.trim() : "",
     due: document.getElementById("f-due").value,
     desc,
     immediate: document.getElementById("f-immediate").value,
@@ -940,7 +1721,7 @@ function submitNCR() {
   NCRs.push(ncr);
   autoFlagRepeats();
   // Reset form
-  ["f-raised-by","f-assigned","f-desc","f-immediate","f-rootcause","f-corrective","f-preventive","f-other-tag"].forEach(id => document.getElementById(id).value = "");
+  ["f-raised-by","f-assigned","f-cell","f-email","f-desc","f-immediate","f-rootcause","f-corrective","f-preventive","f-other-tag"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("f-dept").value = "";
   document.getElementById("f-repeat-tag").value = "";
   document.getElementById("other-tag-wrap").style.display = "none";
@@ -1094,6 +1875,7 @@ function showTab(id, btn) {
   if (id === "charts") setTimeout(initFullCharts, 50);
   if (id === "register") renderRegister();
   if (id === "new") initForm();
+  if (id === "pending") renderPendingQueue();
 }
 
 // ═══════════════════════════════════════════════
@@ -1112,71 +1894,558 @@ function printAll() {
   }, 400);
 }
 
+// ═══════════════════════════════════════════════
+// WHATSAPP & EMAIL FUNCTIONS
+// ═══════════════════════════════════════════════
+function formatNCRMessage(idx) {
+  const n = NCRs[idx];
+  return `*FSE NCR NOTIFICATION*
+*NCR:* ${n.id}
+*Priority:* ${n.priority}
+*Date Raised:* ${n.date}
+*Issue Type:* ${n.issueType}
+*Department:* ${n.dept}
+
+*Description:*
+${n.desc}
+
+*Immediate Action:*
+${n.immediate || 'None recorded'}
+
+*Due Date:* ${n.due || 'To be confirmed'}
+
+*Action Required:*
+Please log in to the FSE NCR System and complete your Root Cause Analysis, Corrective and Preventive Actions before the due date.
+
+*Link:* https://eric0103360.github.io/fse-ncr-system/
+*Password:* FSE.Assign01
+
+_FSE | Field Services & Engineering_`;
+}
+
+function sendWhatsApp(idx) {
+  const n = NCRs[idx];
+  const cell = n.assigneeCell || '';
+  const msg = encodeURIComponent(formatNCRMessage(idx));
+  
+  if (!cell) {
+    // No cell number — open WhatsApp without number
+    const url = `https://wa.me/?text=${msg}`;
+    window.open(url, '_blank');
+  } else {
+    // Format SA number — remove leading 0, add 27
+    let num = cell.replace(/\D/g,'');
+    if (num.startsWith('0')) num = '27' + num.slice(1);
+    if (!num.startsWith('27')) num = '27' + num;
+    const url = `https://wa.me/${num}?text=${msg}`;
+    window.open(url, '_blank');
+  }
+}
+
+function sendEmail(idx) {
+  const n = NCRs[idx];
+  const subject = encodeURIComponent(`NCR ${n.id} | ${n.priority} | Action Required — ${n.issueType}`);
+  const body = encodeURIComponent(`Dear ${n.assignedTo || 'Team Member'},
+
+You have been assigned a Non-Conformance Report that requires your attention.
+
+NCR NUMBER: ${n.id}
+PRIORITY: ${n.priority}
+DATE RAISED: ${n.date}
+ISSUE TYPE: ${n.issueType}
+DEPARTMENT: ${n.dept}
+DUE DATE: ${n.due || 'To be confirmed'}
+
+DESCRIPTION:
+${n.desc}
+
+IMMEDIATE ACTION TAKEN:
+${n.immediate || 'None recorded'}
+
+ACTION REQUIRED:
+Please log in to the FSE NCR System and complete your Root Cause Analysis, Corrective and Preventive Actions before the due date.
+
+LINK: https://eric0103360.github.io/fse-ncr-system/
+PASSWORD: FSE.Assign01
+
+Regards,
+FSE Quality Management
+Field Services & Engineering`);
+
+  const emailTo = n.assigneeEmail || n.assignedTo || '';
+  window.location.href = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+}
+
 function printSingleNCR(idx) {
   const n = NCRs[idx];
-  const pClass = n.priority === 'CRITICAL' ? 'priority-crit-print' : n.priority === 'MAJOR' ? 'priority-major-print' : 'priority-minor-print';
   const today = new Date().toLocaleDateString('en-ZA');
-  const frame = document.getElementById('print-ncr-frame');
-  frame.innerHTML = `
-    <div class="ncr-print-header">
+  const priorityColor = n.priority === 'CRITICAL' ? '#dc2626' : n.priority === 'MAJOR' ? '#d97706' : '#059669';
+  const priorityBg = n.priority === 'CRITICAL' ? '#fee2e2' : n.priority === 'MAJOR' ? '#fef3c7' : '#d1fae5';
+
+  const FSE_LOGO_B64 = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAB7AJsDASIAAhEBAxEB/8QAHQAAAgICAwEAAAAAAAAAAAAAAAgGBwUJAQMEAv/EAEcQAAEDBAAEAwUEBgYHCQAAAAECAwQABQYRBxIhMQhBURMyYXGBFCKRoRUWI0JDUhckYrHB0TM4RlOCkuFkcnWTlaKy0vD/xAAbAQACAgMBAAAAAAAAAAAAAAADBAAFAQIGB//EADARAAEEAQEGAwgCAwAAAAAAAAEAAgMRBCEFBhIxQVETImFxgaGxwdHh8CORJDJS/9oADAMBAAIRAxEAPwBy6KKKiiKKKKiiKpHNfEdi1oeeh2KBLvMppSkFZHsWQoHR6nqevoKu6kC4q2z9DcSchtyU8qGp7hR8UqPMD+dK5cr42gtXR7ubOxs6Z7ZxdCwLr2qU5fx14hX9SkMXJFljE9G4CeVWvis7V+GqtTw/8bRdixi+ZSgm4nSIk9w6Ej0Qs+S/j5/PurlH5VXMyJGu4rtdtk7Dw54PBDA3sQNQfr71sjopFI3F/iPEYistZZLDUUJDaVJQeYJ7BRI2r06mmEwLP8e4y4u7jlymO2fIEo2UxZBbXzD+KyoHqPVJ/MdasospkhrkuE2ju7l4MfimnDrV6e1XPUN4s8RLFw6x1VzuzockubTEhoP7R9foPRI81eVLLnjPFXhlkjUObl17ct7zn9VmiYstPDfYgkgK9Un6VAuJYv8Altx/S0y6PT5fIG/26+yR2CfIU82O+q5p01aVqsXnHE7LMmy5WTPXiXEnoOo32V5TaYyN+4jR6D19fOpzgfigz7H+SPf0Rckhp6EvD2UgD4LSNE/94GqOnRJ0FfLLjuNde6h0/GvG6oqHwo5a0ikuHOBu1sm4McULHxRsMi52eLMiLirS3JYkJG0KI2NKB0oa86ndUL4GbWYXBf7etHKufPdWD6oTpKT+Rq+qVcADQTrCS0EoooorVbIoooqKIrhakoQVrUEpSNkk6AFc0uHig4rlAfwXHJOln7t0ktq90f7lJ9f5vw9aHLKI28RT2z8CXPnEUfvPYd1L5PiJwKNf5NtdTcVR2HC2ma0yFtOEdyADza35661Mcd4m4Ff+VNtyi3KcP8N132S/lpejukLHQaFcEA9wDVc3OeOYXcS7o4jm0xxB/v8Af7Tn8W+NmPYUldvt/JeL1rpHaX+za32Lix2+Q6/KlIzHIrllmSyr9dfZGZLUOYMt8qRoaAA+X1NduEYpfMyvrdnsMQvvq+844ro2yn+ZavIfmabnhRwZxrCWmpklpF2vQAKpbyNpbPo2k9E/PvWf5co9gtLwN3maeaQj3/gfuqXbA+COc5UhuSuGmzQF9Q/OBSpQ9Ut+8froVdGMeGzD4KUrvk+4Xh4dSkL9i18tJ6/nV30U2zEjbzFrm8veXOyD5XcA7D781ELTwx4f2oJ+xYjakqHZTjAcV+KtmpBEstmiOJdiWmBHWj3VNRkJKfkQOle+ijhrRyCppMiaTV7ifaSvNcrfAucYxbjCjzGCQfZvthadjsdHzqE3/g5w8vHMpywphuq/iQnVMkfRJ5fyqf0VuCQgEA80tmaeGt9SVuY7eUzGQNiHPGifhzjofqBVBZpgascuC7de7HJgSSglClbSlXxT5EfKtiFYzJbBZsktblsvluYnRXB1Q6nej6g9wfiK3bIRzQnQg8koHArj8rh5Hh4Vk0BD+Pxk8rEuOnT0cKJUeZP8QbJ9D86cG2X2z3KyM3uFcor1ueQHESQ4AgpPqT2+tJz4geAN2xWc5kmNNO3iw/xWSf20Xpr7xHvI/tDqPP1qqM2dk/oe3xS64hn2qSWQshAVyp8t6rcsD9QtBI5mhT35Rxm4a44ZSJ2VQnn4qOd1iIS+4B8kbrJ8OOIWM59Cdk2CS4pTISpxh9HI6lKhtKinfY9evwNa8JPskv5Mnk/aeyGleg2Kz2N5xeOHWaWLJLOpS1Nw2m5MYn7slkj7zZ/vB8iBUMQrRQTm9VsdorC4Rk1qzDF4WQ2Z4uRJbYUAoaW2rzQoeSgehFZqgJnmiqO4/cFWslD+TYq0hm9655EYdETPiPRz4+fnV418SHm48dx95YQ02krWo9gANk1pJG2RtOTeFmzYcolhOvz9Ctcclh6NIcjSWXGX2lFDjbiSlSFDuCD2NZTDccueWZJEsNoa55MlWtn3W0j3lq9ABXq4lZIrLc5ut/UkIRJfPskga02n7qN/HQG/jTL+FHCG7Fh36zzGR+kbuOZsqHVuOD90D05veP09KqIYfEk4RyXpu09pnBwvGcKeaoep+ysLhphFnwTHGrRamgVkBUmSoftJDnmpR9PQeQqUUUVctAaKC8rllfM8vebJRRRRWUNFFFFRRFFFFRRFFFFRRcLSlaChaQpKhogjYIpOfGBwtVjyouTWGOo2eTMH2ltPaK4rQHyQojp6Hp6U49eK/WqDe7PKtNyYQ/ElNlt1ChsEH/Ed62a7hK0ewOFLWhNB+05Ho60hJ7d/vdvlUsxbhxkHEfKbVarIyUtNxmVTJaxpuMjXcnzPonuaxmf2KZjGX5rYJm+eKQEqI99BVtKvqkinE8Jt0tk3hZHgxIzLEyCUty+ROlOkpBStXrsdP+E0w91CwlWM4nUVOOGWD2Xh/izVgsiXS0Fl1511RUt51XvLO+2/QdBUnoopUm04BSpnKPEZhNqedj26Ncbu82opJabDbZI9FK/yqq878Q2RZFaJtngWaFbIkxpTLiy4p17kUNHR6AHXwNU1KPNKdV6rJ/OuuqZ+VI7S16pi7u4GPTuGyOpP6PgshjFrXesjtlnbGzMlNs6+BUN/luthsGM1ChMQ2EhLTDaW0AeQA0KRrgG0l3jHjIX2TL5x8wk6p66awG+Ulc9vjKTNHH0Av+z+EvnG/jPkFuzBWF4PHR9tbWlp6QWvarU6oAhttJ6eY2Tvr8qwYY8TykhXNKGxvXtYo/LdQPiFJu0PxDXOXYGS9dWrtzRGw3z8zmhocvn8qnZzrxHj/Zt//wBG/wCtD8TiceIn3J4YbceCIQMj1aCS/mSfogseJ3+aZ/5sX/OspGyPibw+xebmnEq6SXUtOJi260BTX9ZfXvSnFIHRAAJ0Ds6P18tmy7xH3O6x4AsqYntlhJfk2rkabHmpRJ7CrS4t8PZee8ME45OuTbt1YW3JbklrkbcfRvukdkkEj4b3TGOxrnXbveqXbGRJDF4ZZFbv+BZH2+aoS0Zh4js9D92x1K0wEOFCTESy01vQPKkuHatb77NZKEx4qvtrRfTMDBWOYGRFJA+hrC4g7x84Zw3sYs2LzzCS8p1IMH7W2Cfe5FpPY+hrKr4neJdM3lZwt91hABUpdjcQVbOiB1+tWRHalyAPcldF04v8Y+GeWxIeaW8Tbe+AstyUthTiN6UW3EdNj6jferk4s8X7fimF2q72pKJMq9Ne1ghwfdSjlBK1Ad9bHT1+VVraePN2g3+PauKWGMNtbAcfMbldjb8y2re0/LR+ddXjPVCcexL7Kpv2Dkd1TPs9BJR90jWvLRrHDZFhZ4qaSCvCxd/Ehl9vbvmPO3KPCfSpTJDUZtLo/dUErIIB9a4tcTxWtK9tPcuT2jpLKHoYCviTvtWHxTOvEnGstviWXGnnbOzGaRDcFn5wtoJASebfXp51I7hnfiYRbg5Gxl8v8wBT+ht9NDfTfzrNH0WAR3KythtviUu9+gxLjOdsNv8Abbly1vx3SGwOyUp2ST2FMdDZVHitMKecfUhASXHDtSyPM/Gqp4DZDxRvd1vKOINpcgRmW2zCKoXsOZR3zdd9fKrboTzqjMGlpSvG/j6Id4RkjLKU/pC3CM855qW2vaf/AGqNQPhNxbc4VX9T7lqcucK5QWG3mUPBtSVJ91Y2CD0Khr41dvjrQk8MYLh95MwgfVPWlFylSEy7YXDpCWGuY/DVHZ5m0UvIeF9hOti/iU4dXdSWppuVoe5eZQkxypCf+JG/7qn8XiNgcmOh9nLrMW1jaSqWhJ/AnYrX7bUs/apKWjorjkt76713FZSFBizIrcnaPvjz79On+FYMQWRO5XJkfhszGItxyz3O2XRvZKUrUWHD+O0/nVcZRw8zbGGHJN7xyZGjNe/ISAtodddVJJAp+qxOZWZrIsUulje0EzYq2QT+6oj7p+h0fpVU/CYR5V2uJvZlNcBMAR1NUfhp8EjHCm5ItHEvHLi6rTbU9vnPwUeX/Gn9rXHNiyrdcH4chKmJUV1Tawe6FpOvyIp7eDmVNZhw9td3StJkBoMykg9UOo6KH+P1oeC+raU7vfjlwjyG8uX1H1S2Sv8AW3T/AOPp/wDjThVFVcOsKVlAydVgjG8B/wC0fauZXN7T+bvqpVTUMRj4r6lc7tXaEeZ4XACOFoBv0RUL40PZhEwWROwmQGrnFWl5afYpdLjQ3zpCVA9eoPr0qaUUwNFUEWEsvCHxItNWt+BxHdefuLbqlImRGEcpQeyFITrSh6667qeJ8RfDRRATLuJG9E/ZegP41Lch4XcPb/OVOuuJWx+Uo7W6GuRSj6kp1s/OsZ/Qfwp9qXBhVuCieboV63rXbm1W9sKGA8dUtfiIzA8WcrskbC7RJd9k2WUOKZHtpClkfd0N8oHqfj2qW+JPCr3bMJwJ97UiJZICodweHUoWUJCT8iQR9PjTGYvheKYuSqwWCDb1lAQXGmhz8oGgOY9dfWs3KjsSo7kaUy2+y4nlW24kKSoehB6EVPEqqWPDJuzzS9cMvERg1swuz2K6sXaPcIMVqM6huOHEEpToKSoHRBA38Kkq/Elw1Ra03JTl3DClcqf6kdn6bqQSeB/CiQ8t5zCbcFrO1chWgH6BQFdf9BPCXkKP1Kg6J3/pHP8A7VLYsgSDsvBjviB4c3vJYmPszJ8WVKPK0uVG9m0Va2AVbIG/jVr1WyuBHCVSUJOFQdN+7+0cBH15qsOJHYgwmozIKGGEBCApRPKkDp1PXt61qa6LdvF1S1+O66tHHrbZEqHtUhUtQB/d2ED890rWSMOS5dujtNOOrcYaSEIGyegqe8fsy/XPPcvnMrKoUYNRYnoUNqIKvqdn8KYjwfYmmFij+WSmEl+5IaajKUnqlptOiR6bUT/yijg8DUsR4j9EtVh4ScVr2+y5bMQmNo6cj76gy3odjtZH91XBYvDZlqrSwq5TrPHlqBLrSXVqCSSfMJ1+FNfRQzKSiiFoRVZcb+LNtwCAYUQtzb++jbEbe0sg9lueg9B3NWYobSRsjY7jypF+OOI3rE89mou8h+cic4qRGnOHZfST2J/mT2I+VI5Uro2W1dJu/gQZuTwzHlrXdRC83KbeLrKutyfL8yU4XXnCAOZR7nQqyPDnxGGD5QqDc3Smx3NSUvk9mHOyXfl5H4dfKqsoqpY8sdxDmvScnEiyYDA8eUivZ2r2LZC2tDjaXG1pWhQCkqSdgg9iDX1SncAeNa8ZQzjOWOuO2cHljS+qlxP7KvMo/MfKmrgy406G1MhyGpEd5IW262oKSsHzBHerqKZsosLyraWy5tny8Eg06Hof3su6iiiiqtRRRRUURRRRUURRRRUURVCeLPi0MQsjeLWN0LvNwKUyVIPWMwe/yUodB6DZ9KyHHTjdFxdmTYcRXGuGQJHK8+tY+zW/fm4eyl+iB9aS6+fb5FzTd51//ScyXK53ZilFX397O/8ApRo471KBLLWgXzcXwhq+Rg1v2ikr9oPLqelON4cOLtjuFqs+C3UMWy6swmkQv3WpaQnsn0X8PPy9KTMMTLtNmRYGyXPeQeg7+8T5CpIuzNXm7Wm0wnpcq7kNx47UI6JdHYhXcaPXflRXNDggMeWnRbIKKweA2+8WrDbXbr/clXK5sR0okyVd1q+J89dt+et1nKUTwRUT4rYPbs9xN+zzOVuQn9pDka2WHQOh+R7EeYqWUVhzQ4UUSGZ8LxIw0RySg2Xw4Z7MfKbhItVtaBI51PF0keoSkf3mrEx7wy41GCV3y+XG4r11QwEsI3+ZP4ir6opduJE3paup95NoTaB/D7BX5+KTHi/wWv8Ahbr1xtiHbtYtlQebTt1gejiR5f2h09dVHuGvE7KsDfAtMsP29StuQZBKmVepHmk/EfnT3K0UkK1y6677Vr0zWW1PzK9TWGm2WnpzykIbSEpSOYjoB2HSlMiIQEOYaXT7D2g7a0T4MpgcGga9/d39QmxwLj7hWQobYuryrBPOgW5Z/ZKP9lwdPx1VrRJMeWwl+JIakMq91xpYUk/IjpWuGslYr/fbC77Wy3mfblf9nfUgH6A6rLM5w/2FoOXujC88WO/h9DqPv81sRopNsM4/Z3Z7lHVeZqb3b0q08y62hLik+qVgDqPjTIPZDOzjBBeeGl9hszPeSmSwFjmA6tLBO0K+P+FOwzsl0C5XaWxsnZ1GQW09RyU5rhxaG0KW4pKEJG1KUdACktyvjDxXh3OVaLxkb9lmx1crjTUBltaf+YHp6HzqBZLlGSX+M5+lc3vVxUpB5Gn3UlsnyHL21TYiKpDOOydXMOLeCYygpkXpqbJPux4JDyz8+XoPqaU3jT4lM0yS4SLDYkfq5ag57NZZc3JeTv8Aec/dBHkn8TUBxn2zbEaPNPI8lxQUltSdJSevTXQVHM2jAX1mQ0SpEhKSFeujr/KiNjAQXSucp9j/AA+y/iLLRa8YhFTRkuKlS3NpYZO+qlr8z8Bsmr0c8J0aPirEK25e6m6NpKlvSIiVNFwj7xSAQUj07mrl4DzYtw4TWCVEYZYSY/ItDSAkc6VFJJA8zrZ+dTehukN6IzIm1qkwvPh24i41jzkeyNwr286rmkOx3w2tQ9Aleunw3Vt+F7gyvBoSsnydhCsmmIKUtkhQhNH9wEdOc/vEfL13elFamQkUtmxNBtFFFFaIiKKKKiiKKKKii8l5bkPWia1D5ftK47iWeY6HOUkJ2fnqkJy/CcvxV9f6xWOXFBUdvhPOyo76kLTsVsBr4eaaeaU082hxtY0pC0ggj0INLz44mrVXWx9sv2aXU0ODqvvp6/ha3wQRsHdWLwV4WXPiFdA+57SJYo69SZeuqz/u2/VXqew/KrZ8RGA4db02y4W+wxociXPbafMcqbStKlAEcqSEj5gbq+bJbIFntUe2WuI1Ehx0BDTTY0lI/wD3nSkWJ5yHHkul2hvN/iNfjtIc++fSufz0UJkcFeGT8dtleKxk8iQkLbccQo6HclKhs/GvbhXDDFcNuq7jjrU6EtxPK62Ja1NuDy5kqJB15GprRVgImA2AuLdtDKe0sdI4g9CTSjWVYBhWVT2Z+R4xa7rKZTyNuyY4WoJ9OvcfOqJ8Qfh/jBh3KeHtpjNutIKpdpaZHK6Na52h5K/s+fl17s3RRQ4hJOYHBauMbS3FuK2G1OBxtwqdQ4jkKD21r1FSu2cOs0zSDEbxzHp01caWpsvFPs2ggnuVq0NdB+NPV/Rhw/Vl0nJ14la13eRpTshbXNzK/m5T93fTvrdTBtCG0JQ2hKEJGglI0AKIZuyCIO5VfeHrEb9hPDlux5E9GcmCW88lLCypLaFnYTvQ2R17dKsOiihE2bRwKFIooorCyiiiioov/9k=";
+  const printContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${n.id} - NCR Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #000; padding: 20px; background: white; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #e8a020; padding-bottom: 12px; margin-bottom: 16px; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-left .title { font-size: 15px; font-weight: bold; color: #000; margin-bottom: 3px; }
+    .header-left .meta { font-size: 10px; color: #555; }
+    .header-right { text-align: right; font-size: 10px; color: #555; line-height: 1.8; }
+    .priority-badge { padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; background: ${priorityBg}; color: ${priorityColor}; border: 1px solid ${priorityColor}; }
+    .priority-bar { display: flex; align-items: center; gap: 12px; margin: 10px 0; padding: 7px 12px; background: ${priorityBg}; border-left: 4px solid ${priorityColor}; }
+    .priority-bar span { font-weight: bold; font-size: 11px; color: ${priorityColor}; letter-spacing: 1px; text-transform: uppercase; }
+    .section { margin-bottom: 12px; }
+    .section-title { font-size: 10px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #e8a020; background: #fef9f0; padding: 4px 8px; border-left: 4px solid #e8a020; margin-bottom: 6px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #ddd; margin-bottom: 4px; }
+    .field { padding: 6px 10px; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+    .field:nth-child(even) { border-right: none; }
+    .field label { font-size: 9px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px; }
+    .field span { font-size: 12px; color: #000; }
+    .text-box { background: #f9f9f9; border: 1px solid #eee; padding: 8px; border-radius: 3px; min-height: 36px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .footer { border-top: 1px solid #ccc; padding-top: 8px; margin-top: 16px; font-size: 10px; color: #777; display: flex; justify-content: space-between; }
+    .sign-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 8px; }
+    .sign-field { border-top: 1px solid #999; padding-top: 4px; font-size: 10px; color: #555; height: 36px; }
+    @media print { body { padding: 10px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <img src="${FSE_LOGO_B64}" style="width:60px;height:60px;object-fit:contain;" alt="FSE">
       <div>
-        <div class="ncr-print-title">NON CONFORMANCE AND CORRECTIVE ACTION REPORT</div>
-        <div class="ncr-print-meta">FSE | Field Services &amp; Engineering &nbsp;&middot;&nbsp; Doc No: FSE-QR-NCR-008 &nbsp;&middot;&nbsp; Printed: ${today}</div>
-      </div>
-      <span class="${pClass}">${n.priority}</span>
-    </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">NCR Details</div>
-      <div class="ncr-print-grid">
-        <div class="ncr-print-field"><label>NCR Number</label><span><strong>${n.id}</strong></span></div>
-        <div class="ncr-print-field"><label>Date Raised</label><span>${n.date}</span></div>
-        <div class="ncr-print-field"><label>Raised By</label><span>${n.raisedBy}</span></div>
-        <div class="ncr-print-field"><label>Assigned To</label><span>${n.assignedTo}</span></div>
-        <div class="ncr-print-field"><label>Issue Type</label><span>${n.issueType}</span></div>
-        <div class="ncr-print-field"><label>Department</label><span>${n.dept}</span></div>
-        <div class="ncr-print-field"><label>Due Date</label><span>${n.due || '&mdash;'}</span></div>
-        <div class="ncr-print-field"><label>Status</label><span>${n.status}${n.closedDate ? ' &mdash; Closed: ' + n.closedDate : ''}</span></div>
+        <div class="title">NON CONFORMANCE AND CORRECTIVE ACTION REPORT</div>
+        <div class="meta">FSE | Field Services &amp; Engineering &nbsp;&bull;&nbsp; Doc No: FSE-QR-NCR-008</div>
       </div>
     </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">Description of Non-Conformance</div>
-      <div class="ncr-print-text">${n.desc || '&mdash;'}</div>
+    <div class="header-right">
+      <div><strong>Revision:</strong> 03</div>
+      <div><strong>Effective:</strong> 22.07.2025</div>
+      <div><strong>Approved by:</strong> W.Diab - CEO</div>
+      <div><strong>Printed:</strong> ${today}</div>
     </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">Immediate Action Taken</div>
-      <div class="ncr-print-text">${n.immediate || '&mdash;'}</div>
+  </div>
+  <div class="priority-bar">
+    <span class="priority-badge">${n.priority}</span>
+    <span>${n.priority === 'CRITICAL' ? 'High Impact — Immediate Attention — Close: 24–72 hrs' : n.priority === 'MAJOR' ? 'Significant Impact — Close: 7 Days' : 'Minor Impact — Close: 14+ Days'}</span>
+    <span style="margin-left:auto;font-size:11px;color:#555"><strong>NCR:</strong> ${n.id} &nbsp;&bull;&nbsp; <strong>Date:</strong> ${n.date}</span>
+  </div>
+
+  <div class="section">
+    <div class="section-title">NCR Details</div>
+    <div class="grid">
+      <div class="field"><label>NCR Number</label><span><strong>${n.id}</strong></span></div>
+      <div class="field"><label>Date Raised</label><span>${n.date}</span></div>
+      <div class="field"><label>Raised By</label><span>${n.raisedBy}</span></div>
+      <div class="field"><label>Assigned To</label><span>${n.assignedTo}</span></div>
+      <div class="field"><label>Issue Type</label><span>${n.issueType}</span></div>
+      <div class="field"><label>Department</label><span>${n.dept}</span></div>
+      <div class="field"><label>Due Date</label><span>${n.due || '—'}</span></div>
+      <div class="field"><label>Status</label><span>${n.status}${n.closedDate ? ' — Closed: ' + n.closedDate : ''}</span></div>
     </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">Root Cause (5 Why Analysis)</div>
-      <div class="ncr-print-text">${n.rootCause || '&mdash;'}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Description of Non-Conformance</div>
+    <div class="text-box">${n.desc || '—'}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Immediate Action Taken</div>
+    <div class="text-box">${n.immediate || '—'}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Root Cause — 5 Why Analysis</div>
+    <div class="text-box">${n.rootCause || '—'}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Corrective Action</div>
+    <div class="text-box">${n.corrective || '—'}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Preventive Action</div>
+    <div class="text-box">${n.preventive || '—'}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Repeat Issue Tag</div>
+    <div class="text-box">${n.repeatTag || '—'}${n.repeatFlag ? '   🔁 REPEAT ISSUE' : ''}</div>
+  </div>
+
+  <div class="section" style="margin-top:24px">
+    <div class="section-title">Sign Off</div>
+    <div class="sign-row">
+      <div class="sign-field">Investigator Name &amp; Signature</div>
+      <div class="sign-field">Date</div>
+      <div class="sign-field">Originator Sign Off</div>
     </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">Corrective Action</div>
-      <div class="ncr-print-text">${n.corrective || '&mdash;'}</div>
-    </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">Preventive Action</div>
-      <div class="ncr-print-text">${n.preventive || '&mdash;'}</div>
-    </div>
-    <div class="ncr-print-section">
-      <div class="ncr-print-section-title">Repeat Issue Tag</div>
-      <div class="ncr-print-text">${n.repeatTag || '&mdash;'} ${n.repeatFlag ? '&#x1F501; REPEAT ISSUE' : ''}</div>
-    </div>
-    <div class="ncr-print-footer">
-      <span>FSE | Field Services &amp; Engineering &nbsp;&middot;&nbsp; NCR Management System</span>
-      <span>${n.id} &nbsp;&middot;&nbsp; ${n.priority} &nbsp;&middot;&nbsp; ${n.status}</span>
-    </div>
-  `;
-  document.getElementById('modal-overlay').classList.remove('open');
-  document.querySelectorAll('header, .tabs, main').forEach(el => el.style.display = 'none');
-  frame.style.display = 'block';
-  setTimeout(() => {
-    window.print();
-    frame.style.display = 'none';
-    frame.innerHTML = '';
-    document.querySelectorAll('header, .tabs, main').forEach(el => el.style.display = '');
-  }, 300);
+  </div>
+
+  <div class="footer">
+    <span>FSE | Field Services &amp; Engineering &nbsp;&bull;&nbsp; NCR Management System</span>
+    <span>${n.id} &nbsp;&bull;&nbsp; ${n.priority} &nbsp;&bull;&nbsp; ${n.status}</span>
+  </div>
+
+  <script>window.onload = function() { window.print(); }<\/script>
+</body>
+</html>`;
+
+  const printWindow = window.open('', '_blank', 'width=800,height=900');
+  printWindow.document.write(printContent);
+  printWindow.document.close();
 }
+
+// ═══════════════════════════════════════════════
+// PUBLIC SUBMISSION FORM
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// NCR FLOW GUIDE
+// ═══════════════════════════════════════════════
+function openFlowGuide() {
+  document.getElementById("login-overlay").style.display = "none";
+  document.getElementById("flow-overlay").classList.add("open");
+}
+
+function closeFlowGuide() {
+  document.getElementById("flow-overlay").classList.remove("open");
+  document.getElementById("login-overlay").style.display = "flex";
+}
+
+let selectedPubPriority = "";
+
+function selectPubPriority(p, btn) {
+  selectedPubPriority = p;
+  ["pub-pri-crit","pub-pri-major","pub-pri-minor"].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.className = "priority-btn";
+  });
+  if (p === "CRITICAL") { btn.classList.add("sel-crit"); setPubDueDate(1); }
+  else if (p === "MAJOR") { btn.classList.add("sel-major"); setPubDueDate(7); }
+  else { btn.classList.add("sel-minor"); setPubDueDate(14); }
+}
+
+function setPubDueDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  const due = document.getElementById("pub-due");
+  if (due) due.value = d.toISOString().split('T')[0];
+}
+
+function openPublicForm() {
+  document.getElementById("login-overlay").style.display = "none";
+  document.getElementById("public-submit-overlay").style.display = "flex";
+  const logo = document.getElementById("public-logo");
+  if (logo) logo.src = document.getElementById("header-logo").src;
+  const d = new Date().toISOString().split('T')[0];
+  document.getElementById("pub-date").value = d;
+  selectedPubPriority = "";
+  ["pub-pri-crit","pub-pri-major","pub-pri-minor"].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.className = "priority-btn";
+  });
+}
+
+function submitPublicNCR() {
+  const name = document.getElementById("pub-name").value.trim();
+  const date = document.getElementById("pub-date").value;
+  const issue = document.getElementById("pub-issue").value;
+  const dept = document.getElementById("pub-dept").value.trim();
+  const desc = document.getElementById("pub-desc").value.trim();
+  const errDiv = document.getElementById("pub-error");
+
+  const due = document.getElementById("pub-due").value;
+  if (!name || !date || !issue || !dept || !desc || !selectedPubPriority || !due) {
+    errDiv.style.display = "block";
+    errDiv.textContent = "⚠ Please fill in all required fields including Priority and Due Date.";
+    setTimeout(() => errDiv.style.display = "none", 3500);
+    return;
+  }
+
+  const ref = "PND-" + Date.now().toString().slice(-6);
+  const submission = {
+    ref, name,
+    contact: document.getElementById("pub-contact").value.trim(),
+    date, issue, dept, desc,
+    priority: selectedPubPriority,
+    due,
+    assignee: document.getElementById("pub-assignee").value.trim(),
+    immediate: document.getElementById("pub-immediate").value.trim(),
+    submittedAt: new Date().toLocaleString('en-ZA'),
+  };
+
+  PendingNCRs.push(submission);
+  updatePendingBadge();
+
+  // Show success
+  document.getElementById("pub-success").style.display = "block";
+  document.getElementById("pub-ref").textContent = ref;
+  document.querySelector(".public-submit-btn").style.display = "none";
+}
+
+function sendPubWhatsApp() {
+  const lastPending = PendingNCRs[PendingNCRs.length - 1];
+  if (!lastPending) return;
+  const cell = document.getElementById("pub-assignee-cell") ? document.getElementById("pub-assignee-cell").value.trim() : "";
+  const msg = encodeURIComponent(`*FSE NCR NOTIFICATION*
+*Ref:* ${lastPending.ref}
+*Priority:* ${lastPending.priority}
+*Issue:* ${lastPending.issue}
+*Dept:* ${lastPending.dept}
+*Date:* ${lastPending.date}
+*Due:* ${lastPending.due}
+
+*Description:*
+${lastPending.desc}
+
+*Immediate Action:*
+${lastPending.immediate || 'None recorded'}
+
+Please be advised this NCR is pending Quality Manager approval before it becomes official.
+
+_FSE | Field Services & Engineering_`);
+  let num = cell.replace(/\D/g,'');
+  if (num.startsWith('0')) num = '27' + num.slice(1);
+  if (!num.startsWith('27')) num = '27' + num;
+  const url = num.length > 5 ? `https://wa.me/${num}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  window.open(url, '_blank');
+}
+
+function sendPubEmail() {
+  const lastPending = PendingNCRs[PendingNCRs.length - 1];
+  if (!lastPending) return;
+  const subject = encodeURIComponent(`NCR Submission ${lastPending.ref} | ${lastPending.priority} | ${lastPending.issue}`);
+  const body = encodeURIComponent(`Please be advised a Non-Conformance has been submitted.
+
+Reference: ${lastPending.ref}
+Priority: ${lastPending.priority}
+Issue Type: ${lastPending.issue}
+Department: ${lastPending.dept}
+Date: ${lastPending.date}
+Suggested Due: ${lastPending.due}
+Submitted by: ${lastPending.name}
+
+Description:
+${lastPending.desc}
+
+Immediate Action: ${lastPending.immediate || 'None recorded'}
+
+This submission is pending Quality Manager review before it becomes an official NCR.
+
+FSE | Field Services & Engineering`);
+  const emailAddr = document.getElementById("pub-assignee-email") ? document.getElementById("pub-assignee-email").value.trim() : "";
+  window.location.href = `mailto:${emailAddr}?subject=${subject}&body=${body}`;
+}
+
+function resetPublicForm() {
+  ["pub-name","pub-contact","pub-dept","pub-desc","pub-immediate","pub-assignee","pub-due"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  document.getElementById("pub-issue").value = "";
+  document.getElementById("pub-success").style.display = "none";
+  document.querySelector(".public-submit-btn").style.display = "block";
+  document.getElementById("pub-date").value = new Date().toISOString().split('T')[0];
+  selectedPubPriority = "";
+  ["pub-pri-crit","pub-pri-major","pub-pri-minor"].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.className = "priority-btn";
+  });
+}
+
+function closePublicForm() {
+  document.getElementById("public-submit-overlay").style.display = "none";
+  document.getElementById("login-overlay").style.display = "flex";
+}
+
+function updatePendingBadge() {
+  const count = PendingNCRs.length;
+  const badge = document.getElementById("pending-count-badge");
+  const alertAwaiting = document.getElementById("alert-awaiting-count");
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? "inline" : "none";
+  }
+}
+
+function renderPendingQueue() {
+  const container = document.getElementById("pending-cards-container");
+  const noMsg = document.getElementById("no-pending");
+  const adminDiv = document.getElementById("pending-admin-only");
+  const noAccess = document.getElementById("pending-no-access");
+
+  if (!isAdmin) {
+    if (adminDiv) adminDiv.style.display = "none";
+    if (noAccess) noAccess.style.display = "block";
+    return;
+  }
+  if (adminDiv) adminDiv.style.display = "block";
+  if (noAccess) noAccess.style.display = "none";
+
+  if (PendingNCRs.length === 0) {
+    container.innerHTML = "";
+    noMsg.style.display = "block";
+    return;
+  }
+  noMsg.style.display = "none";
+
+  container.innerHTML = PendingNCRs.map((p, i) => `
+    <div class="pending-card" id="pending-card-${i}">
+      <div class="pending-card-header">
+        <div>
+          <div class="pending-card-name">📋 ${p.ref} — ${p.issue}</div>
+          <div class="pending-card-meta">Submitted by <strong>${p.name}</strong>${p.contact ? ' · ' + p.contact : ''} &nbsp;·&nbsp; ${p.submittedAt}</div>
+        </div>
+        <span class="b-pending">⏳ Pending Review</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;font-size:11px;flex-wrap:wrap">
+        <div><span style="color:var(--muted)">Date:</span> ${p.date}</div>
+        <div><span style="color:var(--muted)">Dept:</span> ${p.dept}</div>
+        <div><span style="color:var(--muted)">Priority:</span> <strong style="color:${p.priority==='CRITICAL'?'var(--red)':p.priority==='MAJOR'?'var(--amber)':'var(--green)'}">${p.priority || 'Not set'}</strong></div>
+        <div><span style="color:var(--muted)">Due:</span> ${p.due || '—'}</div>
+        ${p.assignee ? `<div style="grid-column:1/-1"><span style="color:var(--muted)">Suggested assignee:</span> <strong>${p.assignee}</strong></div>` : ''}
+      </div>
+      <div class="pending-card-desc">${p.desc}</div>
+      ${p.immediate ? `<div style="font-size:11px;color:var(--muted);margin-bottom:10px"><strong>Immediate action:</strong> ${p.immediate}</div>` : ''}
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="accept-btn" onclick="acceptPending(${i})">✅ Accept — Make Official NCR</button>
+        <button class="decline-btn" onclick="declinePending(${i})">❌ Decline</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function acceptPending(i) {
+  const p = PendingNCRs[i];
+  // Get next NCR number
+  const nums = NCRs.map(n => { const m = n.id.match(/NCR-(\d+)/); return m ? parseInt(m[1]) : 0; });
+  const nextNum = Math.max(...nums, 123) + 1;
+
+  const newNCR = {
+    id: "NCR-" + nextNum,
+    date: p.date,
+    raisedBy: p.name,
+    priority: p.priority || "MAJOR",
+    issueType: p.issue,
+    dept: p.dept,
+    assignedTo: p.assignee || "",
+    due: p.due || "",
+    desc: p.desc,
+    immediate: p.immediate || "",
+    rootCause: "", corrective: "", preventive: "",
+    status: "Open",
+    closedDate: "",
+    repeatTag: "",
+    repeatFlag: false,
+    submittedVia: "Public Form — " + p.ref,
+  };
+
+  NCRs.push(newNCR);
+  PendingNCRs.splice(i, 1);
+  updatePendingBadge();
+  renderPendingQueue();
+  refreshAll();
+
+  alert("NCR-" + nextNum + " created successfully! Go to NCR Register to assign it and set a due date.");
+}
+
+function declinePending(i) {
+  if (confirm("Decline this submission? It will be removed from the queue.")) {
+    PendingNCRs.splice(i, 1);
+    updatePendingBadge();
+    renderPendingQueue();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// WORKFLOW — SIGN OFF, APPROVE, REJECT
+// ═══════════════════════════════════════════════
+let rejectingIdx = null;
+let rejectingRole = "admin";
+
+function submitSignOff(idx) {
+  const checkbox = document.getElementById("signoff-check-" + idx);
+  const nameInput = document.getElementById("signoff-name-" + idx);
+  if (!checkbox || !checkbox.checked) {
+    alert("Please tick the declaration checkbox to confirm.");
+    return;
+  }
+  if (!nameInput || !nameInput.value.trim()) {
+    alert("Please enter your name to sign off.");
+    return;
+  }
+  NCRs[idx].status = "Awaiting Originator";
+  NCRs[idx].assigneeSignOff = nameInput.value.trim();
+  NCRs[idx].assigneeSignOffDate = new Date().toLocaleDateString('en-ZA') + " " + new Date().toLocaleTimeString('en-ZA', {hour:'2-digit',minute:'2-digit'});
+  closeModal();
+  refreshAll();
+  // Show confirmation
+  const t = document.getElementById("vo-toast");
+  t.textContent = "✅ Actions submitted — awaiting admin approval";
+  t.style.borderLeftColor = "#a855f7";
+  t.classList.add("show");
+  setTimeout(() => { t.classList.remove("show"); t.style.borderLeftColor = ""; t.textContent = "🔒 View Only — Contact admin to make changes"; }, 3500);
+}
+
+function originatorApproveNCR(idx) {
+  NCRs[idx].status = "Awaiting Admin";
+  NCRs[idx].originatorApproval = "Approved by Originator on " + new Date().toLocaleDateString('en-ZA');
+  NCRs[idx].originatorApprovalDate = new Date().toLocaleDateString('en-ZA');
+  closeModal();
+  refreshAll();
+  const t = document.getElementById("vo-toast");
+  t.textContent = "✅ Actions approved — sent to Admin for final close-out";
+  t.style.borderLeftColor = "var(--green)";
+  t.classList.add("show");
+  setTimeout(() => { t.classList.remove("show"); t.style.borderLeftColor = ""; t.textContent = "🔒 View Only — Contact admin to make changes"; }, 3500);
+}
+
+function originatorRejectNCR(idx) {
+  rejectingIdx = idx;
+  rejectingRole = "originator";
+  document.getElementById("reject-reason").value = "";
+  document.getElementById("reject-modal").classList.add("open");
+}
+
+function approveNCR(idx) {
+  NCRs[idx].status = "Closed";
+  NCRs[idx].closedDate = new Date().toLocaleDateString('en-ZA');
+  NCRs[idx].adminApproval = "Approved by Admin on " + NCRs[idx].closedDate;
+  closeModal();
+  refreshAll();
+}
+
+function openRejectModal(idx) {
+  rejectingIdx = idx;
+  document.getElementById("reject-reason").value = "";
+  document.getElementById("reject-modal").classList.add("open");
+}
+
+function confirmReject() {
+  const reason = document.getElementById("reject-reason").value.trim();
+  if (!reason) { alert("Please enter a rejection reason."); return; }
+  if (rejectingIdx === null) return;
+  NCRs[rejectingIdx].status = "Rejected";
+  NCRs[rejectingIdx].rejectionReason = reason;
+  NCRs[rejectingIdx].rejectedDate = new Date().toLocaleDateString('en-ZA');
+  NCRs[rejectingIdx].rejectedBy = rejectingRole === "originator" ? "Originator" : "Admin";
+  document.getElementById("reject-modal").classList.remove("open");
+  closeModal();
+  refreshAll();
+  rejectingIdx = null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const rm = document.getElementById("reject-modal");
+  if (rm) rm.addEventListener("click", e => { if (e.target === rm) rm.classList.remove("open"); });
+});
 
 // ═══════════════════════════════════════════════
 // REFRESH ALL
